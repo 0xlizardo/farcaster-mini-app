@@ -1,0 +1,15 @@
+# dependencies
+node_modules/
+
+# production build
+dist/
+
+# environment variables
+.env.local
+*.env
+
+# macOS
+.DS_Store
+
+# Vite cache
+.vite/
