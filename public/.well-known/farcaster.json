@@ -6,13 +6,26 @@
   },
   "frame": {
     "version": "1",
-    "name": "Example Frame",
+    "name": "Farcaster Calorie Tracker",
     "iconUrl": "https://farcaster-mini-app-one.vercel.app/icon.png",
     "homeUrl": "https://farcaster-mini-app-one.vercel.app",
-    "imageUrl": "https://farcaster-mini-app-one.vercel.app/image.png",
-    "buttonTitle": "Check this out",
-    "splashImageUrl": "https://farcaster-mini-app-one.vercel.app/splash.png",
-    "splashBackgroundColor": "#eeccff",
+    "imageUrl": "https://farcaster-mini-app-one.vercel.app/preview.jpg",
+    "screenshotUrls": [
+      "https://farcaster-mini-app-one.vercel.app/preview.jpg"
+    ],
+    "tags": [
+      "health",
+      "fitness",
+      "calories",
+      "miniapp"
+    ],
+    "primaryCategory": "health-and-fitness",
+    "buttonTitle": "Launch Calorie Tracker",
+    "splashImageUrl": "https://farcaster-mini-app-one.vercel.app/logo.png",
+    "splashBackgroundColor": "#f7f7f7",
+    "embed": {
+      "html": "<iframe src=\"https://farcaster-mini-app-one.vercel.app\" style=\"border:none;width:100%;height:100%;\" sandbox=\"allow-scripts allow-same-origin\"></iframe>"
+    },
     "webhookUrl": "https://farcaster-mini-app-one.vercel.app/api/webhook"
   }
 }
