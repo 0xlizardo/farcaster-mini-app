@@ -7,11 +7,8 @@ export default defineConfig({
 
   resolve: {
     alias: {
-      // resolves import WeightForm from "@components/WeightForm"
       "@components": fileURLToPath(new URL("./src/components", import.meta.url)),
-      // resolves import logo from "@assets/logo.png"
       "@assets":     fileURLToPath(new URL("./src/assets", import.meta.url)),
-      // resolves any types from "@types/..."
       "@types":      fileURLToPath(new URL("./src/types", import.meta.url))
     }
   },

@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import { FoodItem, GoalOption } from "@types";
+import { FoodItem, GoalOption, CategoryOption } from "@types";
 import FoodEntry from "@components/FoodEntry";
 import FoodList from "@components/FoodList";
 
@@ -20,103 +20,99 @@ const CalorieTracker: React.FC<CalorieTrackerProps> = ({
   targetWeight,
   goal
 }) => {
-  const [dailyCalories, setDailyCalories] = useState<number>(0);
-  const [remainingCalories, setRemainingCalories] = useState<number>(0);
+  const [dailyCalories, setDailyCalories] = useState(0);
+  const [remaining, setRemaining] = useState(0);
   const [foods, setFoods] = useState<FoodItem[]>([]);
-  const [nextFoodId, setNextFoodId] = useState<number>(1);
+  const [nextId, setNextId] = useState(1);
 
-  // 1. Calculate dailyCalories whenever weight/goal changes
+  // calc daily goal
   useEffect(() => {
     const maintenance = currentWeight * 30;
-    let calculated = goal === "lose"
-      ? maintenance - 500
-      : goal === "gain"
-      ? maintenance + 500
-      : maintenance;
-    const safe = calculated < 1200 ? 1200 : calculated;
-    setDailyCalories(safe);
+    const calc =
+      goal === "lose"
+        ? maintenance - 500
+        : goal === "gain"
+        ? maintenance + 500
+        : maintenance;
+    setDailyCalories(calc < 1200 ? 1200 : calc);
   }, [currentWeight, goal]);
 
-  // 2. Load saved foods from localStorage on first render
+  // load saved
   useEffect(() => {
-    const saved = localStorage.getItem(STORAGE_KEY);
-    if (saved) {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (raw) {
       try {
-        const parsed: FoodItem[] = JSON.parse(saved);
+        const parsed: FoodItem[] = JSON.parse(raw);
         setFoods(parsed);
-        const maxId = parsed.reduce((max, f) => Math.max(max, f.id), 0);
-        setNextFoodId(maxId + 1);
-      } catch {
-        // ignore parse errors
-      }
+        const max = parsed.reduce((m, f) => Math.max(m, f.id), 0);
+        setNextId(max + 1);
+      } catch {}
     }
   }, []);
 
-  // 3. Persist foods and recalc remaining whenever foods or dailyCalories change
+  // persist + recalc
   useEffect(() => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(foods));
-    const consumed = foods.reduce((sum, f) => sum + f.calories, 0);
-    setRemainingCalories(dailyCalories - consumed);
+    const used = foods.reduce((sum, f) => sum + f.calories, 0);
+    setRemaining(dailyCalories - used);
   }, [foods, dailyCalories]);
 
-  // 4. Add a new food entry
-  const addFood = async (foodName: string, amount: number, unit: string) => {
+  // add entry
+  const addFood = async (
+    name: string,
+    amt: number,
+    unit: string,
+    category: CategoryOption
+  ) => {
     try {
-      const searchResp = await axios.get(
+      const search = await axios.get(
         `https://api.spoonacular.com/food/ingredients/search`,
-        { params: { query: foodName, number: 1, apiKey: SPOONACULAR_API_KEY } }
+        { params: { query: name, number: 1, apiKey: SPOONACULAR_API_KEY } }
       );
-      const result = searchResp.data.results?.[0];
-      if (!result) {
-        alert(`No results for "${foodName}".`);
+      const hit = search.data.results[0];
+      if (!hit) {
+        alert(`No results for "${name}".`);
         return;
       }
-      const { id: ingredientId, name: ingredientName } = result;
-
-      const infoResp = await axios.get(
-        `https://api.spoonacular.com/food/ingredients/${ingredientId}/information`,
-        { params: { amount, unit, apiKey: SPOONACULAR_API_KEY } }
+      const info = await axios.get(
+        `https://api.spoonacular.com/food/ingredients/${hit.id}/information`,
+        { params: { amount: amt, unit, apiKey: SPOONACULAR_API_KEY } }
       );
-      const nutrients = infoResp.data.nutrition?.nutrients || [];
-      const calObj = nutrients.find(
-        (n: any) => n.name.toLowerCase() === "calories"
-      );
-      const caloriesForGiven = calObj ? calObj.amount : 0;
+      const nut = info.data.nutrition.nutrients;
+      const cal = nut.find((n: any) => n.name === "Calories")?.amount || 0;
 
-      const newFood: FoodItem = {
-        id: nextFoodId,
-        name: ingredientName,
-        calories: caloriesForGiven,
-        amount,
-        unit
+      const item: FoodItem = {
+        id: nextId,
+        name: hit.name,
+        calories: cal,
+        amount: amt,
+        unit,
+        category
       };
-
-      setFoods((prev) => [...prev, newFood]);
-      setNextFoodId((prev) => prev + 1);
-    } catch (err) {
-      console.error(err);
-      alert("Error fetching nutrition info. Try again.");
+      setFoods((prev) => [...prev, item]);
+      setNextId((id) => id + 1);
+    } catch {
+      alert("Error fetching info.");
     }
   };
 
-  // 5. Remove an entry by id
   const removeFood = (id: number) => {
     setFoods((prev) => prev.filter((f) => f.id !== id));
   };
 
-  // 6. Reset the entire day's log
+  // reset
   const resetDay = () => {
-    if (window.confirm("Are you sure you want to clear today's log?")) {
+    if (confirm("Clear today's entries?")) {
       localStorage.removeItem(STORAGE_KEY);
       setFoods([]);
-      setNextFoodId(1);
+      setNextId(1);
     }
   };
 
   return (
     <div>
       <h2>Your Daily Calorie Goal: {dailyCalories.toFixed(0)} kcal</h2>
-      <h3>Remaining Calories: {remainingCalories.toFixed(0)} kcal</h3>
+      <h3>Remaining Calories: {remaining.toFixed(0)} kcal</h3>
 
       <FoodEntry onAdd={addFood} />
       <FoodList foods={foods} onRemove={removeFood} />
@@ -124,12 +120,12 @@ const CalorieTracker: React.FC<CalorieTrackerProps> = ({
       <button
         onClick={resetDay}
         style={{
-          marginTop: "20px",
+          marginTop: 20,
           backgroundColor: "#dc3545",
           color: "#fff",
           border: "none",
-          padding: "10px 16px",
-          borderRadius: "4px",
+          padding: "8px 16px",
+          borderRadius: 4,
           cursor: "pointer"
         }}
       >

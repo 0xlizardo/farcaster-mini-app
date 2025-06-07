@@ -2,9 +2,15 @@
 
 import React, { useState, useEffect, useRef } from "react";
 import axios from "axios";
+import { CategoryOption } from "@types";
 
 interface FoodEntryProps {
-  onAdd: (foodName: string, amount: number, unit: string) => void;
+  onAdd: (
+    foodName: string,
+    amount: number,
+    unit: string,
+    category: CategoryOption
+  ) => void;
 }
 
 const SPOONACULAR_API_KEY = "87856d33a46b4d97aef088f2f5b58c48";
@@ -20,15 +26,23 @@ const unitOptions = [
   { value: "ounce", label: "ounces (oz)" }
 ];
 
+const categoryOptions: { value: CategoryOption; label: string }[] = [
+  { value: "breakfast", label: "Breakfast" },
+  { value: "lunch",     label: "Lunch"     },
+  { value: "dinner",    label: "Dinner"    },
+  { value: "snack",     label: "Snack"     }
+];
+
 const FoodEntry: React.FC<FoodEntryProps> = ({ onAdd }) => {
-  const [foodInput, setFoodInput] = useState<string>("");
+  const [foodInput, setFoodInput] = useState("");
   const [suggestions, setSuggestions] = useState<string[]>([]);
-  const [showSuggestions, setShowSuggestions] = useState<boolean>(false);
-  const [amount, setAmount] = useState<number>(1);
-  const [unit, setUnit] = useState<string>("gram");
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const [amount, setAmount] = useState(1);
+  const [unit, setUnit] = useState("gram");
+  const [category, setCategory] = useState<CategoryOption>("breakfast");
   const wrapperRef = useRef<HTMLDivElement>(null);
 
-  // Fetch suggestions when user types
+  // fetch live search suggestions
   useEffect(() => {
     if (foodInput.length < 2) {
       setSuggestions([]);
@@ -56,15 +70,15 @@ const FoodEntry: React.FC<FoodEntryProps> = ({ onAdd }) => {
     return () => clearTimeout(timeout);
   }, [foodInput]);
 
-  // Close suggestions on outside click
+  // close suggestions on outside click
   useEffect(() => {
-    function handleClickOutside(e: MouseEvent) {
+    const handleClick = (e: MouseEvent) => {
       if (wrapperRef.current && !wrapperRef.current.contains(e.target as Node)) {
         setShowSuggestions(false);
       }
-    }
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
+    };
+    document.addEventListener("mousedown", handleClick);
+    return () => document.removeEventListener("mousedown", handleClick);
   }, []);
 
   const handleSelect = (name: string) => {
@@ -79,24 +93,25 @@ const FoodEntry: React.FC<FoodEntryProps> = ({ onAdd }) => {
       alert("Please enter a valid food name.");
       return;
     }
-    if (isNaN(amount) || amount <= 0) {
-      alert("Please enter a valid amount.");
+    if (amount <= 0) {
+      alert("Amount must be positive.");
       return;
     }
-    onAdd(name, amount, unit);
+    onAdd(name, amount, unit, category);
     setFoodInput("");
     setAmount(1);
     setUnit("gram");
+    setCategory("breakfast");
     setSuggestions([]);
   };
 
   return (
-    <form onSubmit={handleSubmit} style={{ marginTop: "24px" }}>
+    <form onSubmit={handleSubmit} style={{ marginTop: 24 }}>
       <div ref={wrapperRef} style={{ position: "relative" }}>
         <label htmlFor="foodName">Food Name:</label>
         <input
-          type="text"
           id="foodName"
+          type="text"
           value={foodInput}
           onChange={(e) => setFoodInput(e.target.value)}
           placeholder="Type to search..."
@@ -112,23 +127,20 @@ const FoodEntry: React.FC<FoodEntryProps> = ({ onAdd }) => {
               right: 0,
               background: "#fff",
               border: "1px solid #ccc",
-              maxHeight: "150px",
+              maxHeight: 150,
               overflowY: "auto",
-              zIndex: 10,
               listStyle: "none",
               margin: 0,
-              padding: "4px 0"
+              padding: 0,
+              zIndex: 10
             }}
           >
             {suggestions.map((s) => (
               <li
                 key={s}
                 onClick={() => handleSelect(s)}
-                style={{
-                  padding: "4px 8px",
-                  cursor: "pointer"
-                }}
-                onMouseDown={(e) => e.preventDefault() /* prevent blur */}
+                onMouseDown={(e) => e.preventDefault()}
+                style={{ padding: 8, cursor: "pointer" }}
               >
                 {s}
               </li>
@@ -137,12 +149,12 @@ const FoodEntry: React.FC<FoodEntryProps> = ({ onAdd }) => {
         )}
       </div>
 
-      <div style={{ display: "flex", gap: "8px", marginTop: "12px" }}>
+      <div style={{ display: "flex", gap: 8, marginTop: 12 }}>
         <div style={{ flex: 1 }}>
           <label htmlFor="amount">Amount:</label>
           <input
-            type="number"
             id="amount"
+            type="number"
             value={amount}
             onChange={(e) => setAmount(parseFloat(e.target.value))}
             min="0.1"
@@ -157,16 +169,30 @@ const FoodEntry: React.FC<FoodEntryProps> = ({ onAdd }) => {
             value={unit}
             onChange={(e) => setUnit(e.target.value)}
           >
-            {unitOptions.map((opt) => (
-              <option key={opt.value} value={opt.value}>
-                {opt.label}
+            {unitOptions.map((o) => (
+              <option key={o.value} value={o.value}>
+                {o.label}
+              </option>
+            ))}
+          </select>
+        </div>
+        <div style={{ flex: 1 }}>
+          <label htmlFor="category">Category:</label>
+          <select
+            id="category"
+            value={category}
+            onChange={(e) => setCategory(e.target.value as CategoryOption)}
+          >
+            {categoryOptions.map((o) => (
+              <option key={o.value} value={o.value}>
+                {o.label}
               </option>
             ))}
           </select>
         </div>
       </div>
 
-      <button type="submit" style={{ marginTop: "16px" }}>
+      <button type="submit" style={{ marginTop: 16 }}>
         Add
       </button>
     </form>

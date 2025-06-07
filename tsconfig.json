@@ -15,17 +15,20 @@
     "isolatedModules": true,
     "noEmit": true,
     "jsx": "react-jsx",
+
+    // ← Project‐wide path mappings
     "baseUrl": ".",
     "paths": {
       "@components/*": ["src/components/*"],
-      "@assets/*": ["src/assets/*"],
-      "@types/*": ["src/types/*"]
+      "@assets/*":     ["src/assets/*"],
+      "@types":        ["src/types/index.ts"],     // root import
+      "@types/*":      ["src/types/*"]             // wildcard imports
     },
-    // ← Tell TS about Node and Vite’s own types
+
+    // Tell TS about Node and Vite types (for import.meta.url, etc.)
     "types": ["node", "vite/client"]
   },
-  "include": [
-    "src",
-    "src/types"
-  ]
+
+  // ← Include your source code + type declarations
+  "include": ["src", "src/types"]
 }
