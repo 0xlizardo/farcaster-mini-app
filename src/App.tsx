@@ -1,6 +1,7 @@
 // src/App.tsx
 
 import React, { useState, useEffect } from "react";
+import { sdk } from "@farcaster/frame-sdk";
 import WeightForm from "@components/WeightForm";
 import CalorieTracker from "@components/CalorieTracker";
 import logo from "@assets/logo.png";
@@ -18,7 +19,18 @@ const App: React.FC = () => {
   const [goal, setGoal] = useState<GoalOption | null>(null);
   const [activeTab, setActiveTab] = useState<"tracker" | "settings">("tracker");
 
-  // 1. On mount, load saved weight/goal if present
+  // 1. Handshake: hide the Farcaster splash when ready
+  useEffect(() => {
+    (async () => {
+      try {
+        await sdk.actions.ready({ disableNativeGestures: true });
+      } catch {
+        // ignore if not in Farcaster frame
+      }
+    })();
+  }, []);
+
+  // 2. Load saved weight/goal once
   useEffect(() => {
     const cw = localStorage.getItem(STORAGE_KEYS.currentWeight);
     const tw = localStorage.getItem(STORAGE_KEYS.targetWeight);
@@ -35,7 +47,7 @@ const App: React.FC = () => {
     targetWeight !== null &&
     goal !== null;
 
-  // 2. Handle form submission: save to state + localStorage + switch to Tracker tab
+  // 3. Handle form submission: save and switch to tracker
   const handleFormSubmit = (
     cw: number,
     tw: number,
@@ -53,19 +65,15 @@ const App: React.FC = () => {
   return (
     <div className="container">
       <header style={{ textAlign: "center", marginBottom: "24px" }}>
-        <img
-          src={logo}
-          alt="FarFit Logo"
-          style={{ maxWidth: "120px" }}
-        />
+        <img src={logo} alt="FarFit Logo" style={{ maxWidth: "120px" }} />
       </header>
 
       {!isFormSubmitted ? (
-        // If never submitted, show WeightForm
+        // Show form initially
         <WeightForm onSubmit={handleFormSubmit} />
       ) : (
-        // Otherwise show Tabbar + corresponding content
         <>
+          {/* Tab buttons */}
           <div
             style={{
               display: "flex",
@@ -105,6 +113,7 @@ const App: React.FC = () => {
             </button>
           </div>
 
+          {/* Tab content */}
           {activeTab === "tracker" ? (
             <CalorieTracker
               currentWeight={currentWeight!}
