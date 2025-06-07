@@ -1,3 +1,5 @@
+// src/components/CalorieTracker.tsx
+
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { FoodItem, GoalOption } from "@types";
@@ -5,6 +7,7 @@ import FoodEntry from "@components/FoodEntry";
 import FoodList from "@components/FoodList";
 
 const SPOONACULAR_API_KEY = "87856d33a46b4d97aef088f2f5b58c48";
+const STORAGE_KEY = "farfit-foods";
 
 interface CalorieTrackerProps {
   currentWeight: number;
@@ -22,68 +25,88 @@ const CalorieTracker: React.FC<CalorieTrackerProps> = ({
   const [foods, setFoods] = useState<FoodItem[]>([]);
   const [nextFoodId, setNextFoodId] = useState<number>(1);
 
+  // 1. Calculate dailyCalories whenever weight/goal changes
   useEffect(() => {
     const maintenance = currentWeight * 30;
-    let calculated: number;
-
-    if (goal === "lose") {
-      calculated = maintenance - 500;
-    } else if (goal === "gain") {
-      calculated = maintenance + 500;
-    } else {
-      calculated = maintenance;
-    }
-
-    const safeCalories = calculated < 1200 ? 1200 : calculated;
-    setDailyCalories(safeCalories);
-    setRemainingCalories(safeCalories);
+    let calculated = goal === "lose"
+      ? maintenance - 500
+      : goal === "gain"
+      ? maintenance + 500
+      : maintenance;
+    const safe = calculated < 1200 ? 1200 : calculated;
+    setDailyCalories(safe);
   }, [currentWeight, goal]);
 
-  const addFood = async (foodName: string) => {
+  // 2. Load saved foods from localStorage on first render
+  useEffect(() => {
+    const saved = localStorage.getItem(STORAGE_KEY);
+    if (saved) {
+      try {
+        const parsed: FoodItem[] = JSON.parse(saved);
+        setFoods(parsed);
+        // also init nextFoodId to avoid ID collisions
+        const maxId = parsed.reduce((max, f) => Math.max(max, f.id), 0);
+        setNextFoodId(maxId + 1);
+      } catch {
+        // ignore parse errors
+      }
+    }
+  }, []);
+
+  // 3. Whenever foods or dailyCalories change, recalc remaining and persist
+  useEffect(() => {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(foods));
+    const consumed = foods.reduce((sum, f) => sum + f.calories, 0);
+    setRemainingCalories(dailyCalories - consumed);
+  }, [foods, dailyCalories]);
+
+  // 4. Add a new food entry
+  const addFood = async (foodName: string, amount: number, unit: string) => {
     try {
-      const searchUrl = `https://api.spoonacular.com/food/ingredients/search?query=${encodeURIComponent(
-        foodName
-      )}&apiKey=${SPOONACULAR_API_KEY}`;
-
-      const searchResp = await axios.get(searchUrl);
-      const results = searchResp.data.results;
-
-      if (!results || results.length === 0) {
-        alert(`No results found for "${foodName}". Try another term.`);
+      const searchUrl = `https://api.spoonacular.com/food/ingredients/search`;
+      const searchResp = await axios.get(searchUrl, {
+        params: { query: foodName, number: 1, apiKey: SPOONACULAR_API_KEY }
+      });
+      const result = searchResp.data.results?.[0];
+      if (!result) {
+        alert(`No results for "${foodName}".`);
         return;
       }
+      const ingredientId = result.id;
+      const ingredientName = result.name;
 
-      const ingredientId: number = results[0].id;
-      const ingredientName: string = results[0].name;
-
-      const infoUrl = `https://api.spoonacular.com/food/ingredients/${ingredientId}/information?amount=1&apiKey=${SPOONACULAR_API_KEY}`;
-      const infoResp = await axios.get(infoUrl);
-      const nutrition = infoResp.data.nutrition;
-
-      const caloriesObj = nutrition.nutrients.find(
+      const infoUrl = `https://api.spoonacular.com/food/ingredients/${ingredientId}/information`;
+      const infoResp = await axios.get(infoUrl, {
+        params: {
+          amount,
+          unit,
+          apiKey: SPOONACULAR_API_KEY
+        }
+      });
+      const nutrients = infoResp.data.nutrition?.nutrients || [];
+      const calObj = nutrients.find(
         (n: any) => n.name.toLowerCase() === "calories"
       );
-      const caloriesForOneUnit: number = caloriesObj ? caloriesObj.amount : 0;
+      const caloriesForGiven = calObj ? calObj.amount : 0;
 
       const newFood: FoodItem = {
         id: nextFoodId,
         name: ingredientName,
-        calories: caloriesForOneUnit
+        calories: caloriesForGiven,
+        amount,
+        unit
       };
 
       setFoods((prev) => [...prev, newFood]);
       setNextFoodId((prev) => prev + 1);
-      setRemainingCalories((prev) => prev - caloriesForOneUnit);
-    } catch (error) {
-      console.error("Error fetching from Spoonacular:", error);
-      alert("There was an error fetching nutrition info. Please try again.");
+    } catch (err) {
+      console.error(err);
+      alert("Error fetching nutrition info. Try again.");
     }
   };
 
+  // 5. Remove an entry by id
   const removeFood = (id: number) => {
-    const toRemove = foods.find((f) => f.id === id);
-    if (!toRemove) return;
-    setRemainingCalories((prev) => prev + toRemove.calories);
     setFoods((prev) => prev.filter((f) => f.id !== id));
   };
 
