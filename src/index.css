@@ -1,68 +1,90 @@
-/* Reset and global styles */
-
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
-
+/* src/index.css */
 body {
   font-family: Arial, sans-serif;
-  background-color: #f7f7f7;
-  color: #333;
-  line-height: 1.5;
+  background-color: #e9ecef; /* خاکستری–آبی خیلی روشن */
+  margin: 0;
+  padding: 0;
 }
 
 .container {
   max-width: 600px;
-  margin: 40px auto;
-  background-color: #fff;
-  padding: 24px;
+  margin: 2rem auto;
+  padding: 1rem;
+  background-color: #f8f9fa; /* بک‌گراند جدید کارت: خاکستری خیلی روشن */
   border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
 }
 
-h1,
-h2 {
-  margin-bottom: 16px;
-}
-
-input,
-select {
-  width: 100%;
-  padding: 8px;
-  margin-top: 4px;
-  margin-bottom: 16px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
+header img {
+  border-radius: 50%;
+  border: 2px solid #0d6efd;
+  box-shadow: 0 0 5px rgba(0,0,0,0.2);
 }
 
 button {
   background-color: #0d6efd;
   color: white;
-  padding: 10px 16px;
   border: none;
+  padding: 0.5rem 1rem;
   border-radius: 4px;
   cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+button:hover {
+  background-color: #0b5ed7;
 }
 
 button:disabled {
-  background-color: #a0a5ab;
+  background-color: #6c757d;
   cursor: not-allowed;
 }
 
-button + button {
-  margin-left: 8px;
+h2, h3, h4 {
+  color: #333;
+}
+
+input[type="text"],
+input[type="number"],
+select {
+  width: 100%;
+  padding: 0.4rem;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  margin-top: 4px;
+  margin-bottom: 8px;
+}
+
+form label {
+  font-weight: bold;
+  display: block;
+  margin-top: 8px;
+}
+
+form {
+  margin-top: 16px;
 }
 
 ul {
   list-style: none;
-  margin-top: 16px;
+  padding: 0;
 }
 
-li {
-  padding: 8px 0;
-  border-bottom: 1px solid #eee;
+ul li {
+  background-color: #f9f9f9;
+  margin-bottom: 4px;
+  padding: 8px;
+  border-radius: 4px;
   display: flex;
   justify-content: space-between;
+}
+
+ul li button {
+  background-color: #dc3545;
+  border-radius: 4px;
+  padding: 4px 8px;
+}
+
+ul li button:hover {
+  background-color: #c82333;
 }
