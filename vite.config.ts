@@ -1,20 +1,21 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
+// Use the ESM‐native “node:” specifier so Vite + TS find it without extra hacks
+import { fileURLToPath, URL } from "node:url";
 
 export default defineConfig({
   plugins: [react()],
-  root: ".",
+  resolve: {
+    alias: {
+      "@components": fileURLToPath(new URL("./src/components", import.meta.url)),
+      "@assets":     fileURLToPath(new URL("./src/assets", import.meta.url)),
+      "@types":      fileURLToPath(new URL("./src/types", import.meta.url))
+    }
+  },
   server: {
     port: 3000
   },
   build: {
     outDir: "dist"
-  },
-  resolve: {
-    alias: {
-      "@components": "/src/components",
-      "@assets": "/src/assets",
-      "@types": "/src/types"
-    }
   }
 });

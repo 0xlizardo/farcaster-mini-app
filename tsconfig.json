@@ -1,4 +1,3 @@
-// tsconfig.node.json
 {
   "compilerOptions": {
     "target": "ESNext",
@@ -14,10 +13,19 @@
     "moduleResolution": "Node",
     "resolveJsonModule": true,
     "isolatedModules": true,
-    "noEmit": false,
-    "composite": true,
+    "noEmit": true,
     "jsx": "react-jsx",
-    "baseUrl": "./src"
+    "baseUrl": ".",
+    "paths": {
+      "@components/*": ["src/components/*"],
+      "@assets/*": ["src/assets/*"],
+      "@types/*": ["src/types/*"]
+    },
+    // ← Tell TS about Node and Vite’s own types
+    "types": ["node", "vite/client"]
   },
-  "include": ["src"]
+  "include": [
+    "src",
+    "src/types"
+  ]
 }
