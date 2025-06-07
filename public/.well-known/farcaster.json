@@ -1,0 +1,18 @@
+{
+  "accountAssociation": {
+    "header": "eyJmaWQiOjUwMjU2OCwidHlwZSI6ImN1c3RvZHkiLCJrZXkiOiIweDVjQWMwRUFBNjMxZkNlZmVCNDVmMGQzMDZlMzg0NjBDMUFBNzY0ZDYifQ",
+    "payload": "eyJkb21haW4iOiJmYXJjYXN0ZXItbWluaS1hcHAtb25lLnZlcmNlbC5hcHAifQ",
+    "signature": "MHg0ODM2MTIwMDdlZmQ4ZDJiMmRhODZlN2JiOTJmMDFjNjJkNWExOGI5YjM4MmE0ODZlZTBkNzUwY2JmYTlhNThjNGJhYTUzNTk4ZDAzZjE2YzhiMmVkNzhmNjk3YjQ0NDExNTE5ZjYxZDgxMGY1MmQ5ODYwYTMyZjA0OWVkYTAwZTFi"
+  },
+  "frame": {
+    "version": "1",
+    "name": "Example Frame",
+    "iconUrl": "https://farcaster-mini-app-one.vercel.app/icon.png",
+    "homeUrl": "https://farcaster-mini-app-one.vercel.app",
+    "imageUrl": "https://farcaster-mini-app-one.vercel.app/image.png",
+    "buttonTitle": "Check this out",
+    "splashImageUrl": "https://farcaster-mini-app-one.vercel.app/splash.png",
+    "splashBackgroundColor": "#eeccff",
+    "webhookUrl": "https://farcaster-mini-app-one.vercel.app/api/webhook"
+  }
+}
