@@ -7,27 +7,10 @@
     <title>Farcaster Calorie Tracker</title>
 
     <!-- Farcaster Frame Embed -->
-    <meta
-      name="fc:frame"
-      content='{
-        "version":"1",
-        "imageUrl":"https://farcaster-mini-app-one.vercel.app/preview.jpg",
-        "button":{
-          "title":"Launch Calorie Tracker",
-          "action":{
-            "type":"launch_frame",
-            "name":"Farcaster Calorie Tracker",
-            "url":"https://farcaster-mini-app-one.vercel.app",
-            "splashImageUrl":"https://farcaster-mini-app-one.vercel.app/logo.png",
-            "splashBackgroundColor":"#f7f7f7"
-          }
-        }
-      }'
-    />
+    <meta name="fc:frame" content='{"version":"1","imageUrl":"https://farcaster-mini-app-one.vercel.app/preview.jpg","button":{"title":"Launch Calorie Tracker","action":{"type":"launch_frame","url":"https://farcaster-mini-app-one.vercel.app","name":"Farcaster Calorie Tracker","splashImageUrl":"https://farcaster-mini-app-one.vercel.app/logo.png","splashBackgroundColor":"#f7f7f7"}}}'/>
   </head>
   <body>
     <div id="root"></div>
-
     <!-- React entrypoint -->
     <script type="module" src="/src/main.tsx"></script>
   </body>
