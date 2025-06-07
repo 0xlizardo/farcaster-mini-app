@@ -1,3 +1,4 @@
+// tsconfig.node.json
 {
   "compilerOptions": {
     "target": "ESNext",
@@ -13,19 +14,10 @@
     "moduleResolution": "Node",
     "resolveJsonModule": true,
     "isolatedModules": true,
-    "noEmit": true,
+    "noEmit": false,
+    "composite": true,
     "jsx": "react-jsx",
-    "baseUrl": "./src",
-    "paths": {
-      "@components/*": ["components/*"],
-      "@assets/*": ["assets/*"],
-      "@types/*": ["types/*"]
-    }
+    "baseUrl": "./src"
   },
-  "include": ["src"],
-  "references": [
-    {
-      "path": "./tsconfig.node.json"
-    }
-  ]
+  "include": ["src"]
 }
