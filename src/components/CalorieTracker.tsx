@@ -7,6 +7,7 @@ import {
 } from "@types";
 import FoodEntry from "@components/FoodEntry";
 import FoodList from "@components/FoodList";
+import WaterTracker from "@components/WaterTracker"; // 👈 اضافه شده
 
 const SPOONACULAR_API_KEY = "87856d33a46b4d97aef088f2f5b58c48";
 const STORAGE_KEY_FOODS = "farfit-foods";
@@ -95,7 +96,6 @@ const CalorieTracker: React.FC<CalorieTrackerProps> = ({
       );
       const caloriesForGiven = calObj ? calObj.amount : 0;
 
-      // 👇 ساخت URL عکس
       const imageUrl = hit.image
         ? `https://spoonacular.com/cdn/ingredients_100x100/${hit.image}`
         : null;
@@ -152,6 +152,9 @@ const CalorieTracker: React.FC<CalorieTrackerProps> = ({
       >
         Reset Day
       </button>
+
+      {/* 👇 بخش ترک آب */}
+      <WaterTracker />
     </div>
   );
 };
