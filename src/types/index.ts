@@ -11,4 +11,11 @@ export interface FoodItem {
   category: CategoryOption;
 }
 
+export interface ActivityItem {
+  id: number;
+  name: string;
+  duration: number;       // in minutes
+  caloriesBurned: number;
+}
+
 export type GoalOption = "lose" | "gain" | "maintain";
