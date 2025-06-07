@@ -1,7 +1,11 @@
 import React, { useState } from "react";
 import WeightForm from "@components/WeightForm";
 import CalorieTracker from "@components/CalorieTracker";
-import logo from "@assets/logo.png";
+import logo from "./assets/logo.png";
+declare module "*.png" {
+  const value: string;
+  export default value;
+}
 
 const App: React.FC = () => {
   const [currentWeight, setCurrentWeight] = useState<number | null>(null);
@@ -31,6 +35,7 @@ const App: React.FC = () => {
           targetWeight={targetWeight!}
           goal={goal!}
         />
+        
       )}
     </div>
   );
