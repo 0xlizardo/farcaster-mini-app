@@ -44,7 +44,6 @@ const CalorieTracker: React.FC<CalorieTrackerProps> = ({
       try {
         const parsed: FoodItem[] = JSON.parse(saved);
         setFoods(parsed);
-        // also init nextFoodId to avoid ID collisions
         const maxId = parsed.reduce((max, f) => Math.max(max, f.id), 0);
         setNextFoodId(maxId + 1);
       } catch {
@@ -53,7 +52,7 @@ const CalorieTracker: React.FC<CalorieTrackerProps> = ({
     }
   }, []);
 
-  // 3. Whenever foods or dailyCalories change, recalc remaining and persist
+  // 3. Persist foods and recalc remaining whenever foods or dailyCalories change
   useEffect(() => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(foods));
     const consumed = foods.reduce((sum, f) => sum + f.calories, 0);
@@ -63,26 +62,21 @@ const CalorieTracker: React.FC<CalorieTrackerProps> = ({
   // 4. Add a new food entry
   const addFood = async (foodName: string, amount: number, unit: string) => {
     try {
-      const searchUrl = `https://api.spoonacular.com/food/ingredients/search`;
-      const searchResp = await axios.get(searchUrl, {
-        params: { query: foodName, number: 1, apiKey: SPOONACULAR_API_KEY }
-      });
+      const searchResp = await axios.get(
+        `https://api.spoonacular.com/food/ingredients/search`,
+        { params: { query: foodName, number: 1, apiKey: SPOONACULAR_API_KEY } }
+      );
       const result = searchResp.data.results?.[0];
       if (!result) {
         alert(`No results for "${foodName}".`);
         return;
       }
-      const ingredientId = result.id;
-      const ingredientName = result.name;
+      const { id: ingredientId, name: ingredientName } = result;
 
-      const infoUrl = `https://api.spoonacular.com/food/ingredients/${ingredientId}/information`;
-      const infoResp = await axios.get(infoUrl, {
-        params: {
-          amount,
-          unit,
-          apiKey: SPOONACULAR_API_KEY
-        }
-      });
+      const infoResp = await axios.get(
+        `https://api.spoonacular.com/food/ingredients/${ingredientId}/information`,
+        { params: { amount, unit, apiKey: SPOONACULAR_API_KEY } }
+      );
       const nutrients = infoResp.data.nutrition?.nutrients || [];
       const calObj = nutrients.find(
         (n: any) => n.name.toLowerCase() === "calories"
@@ -110,6 +104,15 @@ const CalorieTracker: React.FC<CalorieTrackerProps> = ({
     setFoods((prev) => prev.filter((f) => f.id !== id));
   };
 
+  // 6. Reset the entire day's log
+  const resetDay = () => {
+    if (window.confirm("Are you sure you want to clear today's log?")) {
+      localStorage.removeItem(STORAGE_KEY);
+      setFoods([]);
+      setNextFoodId(1);
+    }
+  };
+
   return (
     <div>
       <h2>Your Daily Calorie Goal: {dailyCalories.toFixed(0)} kcal</h2>
@@ -117,6 +120,21 @@ const CalorieTracker: React.FC<CalorieTrackerProps> = ({
 
       <FoodEntry onAdd={addFood} />
       <FoodList foods={foods} onRemove={removeFood} />
+
+      <button
+        onClick={resetDay}
+        style={{
+          marginTop: "20px",
+          backgroundColor: "#dc3545",
+          color: "#fff",
+          border: "none",
+          padding: "10px 16px",
+          borderRadius: "4px",
+          cursor: "pointer"
+        }}
+      >
+        Reset Day
+      </button>
     </div>
   );
 };
