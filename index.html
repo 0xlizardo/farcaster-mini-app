@@ -4,12 +4,31 @@
     <meta charset="UTF-8" />
     <link rel="icon" href="/src/assets/icon.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Farcaster Mini App: Calorie Tracker</title>
+    <title>Farcaster Calorie Tracker</title>
+
+    <!-- Farcaster Frame Embed -->
+    <meta
+      name="fc:frame"
+      content='{
+        "version":"1",
+        "imageUrl":"https://farcaster-mini-app-one.vercel.app/preview.jpg",
+        "button":{
+          "title":"Launch Calorie Tracker",
+          "action":{
+            "type":"launch_frame",
+            "name":"Farcaster Calorie Tracker",
+            "url":"https://farcaster-mini-app-one.vercel.app",
+            "splashImageUrl":"https://farcaster-mini-app-one.vercel.app/logo.png",
+            "splashBackgroundColor":"#f7f7f7"
+          }
+        }
+      }'
+    />
   </head>
   <body>
     <div id="root"></div>
 
-    <!-- <<< ADD THIS SCRIPT TAG >>> -->
+    <!-- React entrypoint -->
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
