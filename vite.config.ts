@@ -1,21 +1,20 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
-// Use the ESM‐native “node:” specifier so Vite + TS find it without extra hacks
-import { fileURLToPath, URL } from "node:url";
 
 export default defineConfig({
   plugins: [react()],
   resolve: {
     alias: {
-      "@components": fileURLToPath(new URL("./src/components", import.meta.url)),
-      "@assets":     fileURLToPath(new URL("./src/assets", import.meta.url)),
-      "@types":      fileURLToPath(new URL("./src/types", import.meta.url))
+      /* your existing aliases… */
+    }
+  },
+  build: {
+    outDir: "dist",
+    rollupOptions: {
+      external: ["@farcaster/frame-sdk"]
     }
   },
   server: {
     port: 3000
-  },
-  build: {
-    outDir: "dist"
   }
 });
