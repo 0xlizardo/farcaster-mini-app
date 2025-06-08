@@ -7,9 +7,18 @@ import {
 } from "@types";
 import FoodEntry from "@components/FoodEntry";
 import FoodList from "@components/FoodList";
-import WaterTracker from "@components/WaterTracker"; // 👈 اضافه شده
+import WaterTracker from "@components/WaterTracker";
 
-const SPOONACULAR_API_KEY = "87856d33a46b4d97aef088f2f5b58c48";
+const SPOONACULAR_API_KEYS = [
+  "5b0557bc79364a0fbe2e14c8fa75166c",
+  "11081c04d9824515b8bd7bdd02969a83",
+  "b67569d6a09949b2992db0607624b59e",
+  "76070b44bb124975973aa67f9cf594a5",
+  "23fee0fb7c08487fb4f429a1ee52e557",
+  "3bc92fe23c3d4e11b6ac2441c3c555d6",
+  "16435a56ebcd47d885c25449a0d8700c"
+];
+
 const STORAGE_KEY_FOODS = "farfit-foods";
 
 interface CalorieTrackerProps {
@@ -27,6 +36,7 @@ const CalorieTracker: React.FC<CalorieTrackerProps> = ({
   const [remaining, setRemaining] = useState(0);
   const [foods, setFoods] = useState<FoodItem[]>([]);
   const [nextFoodId, setNextFoodId] = useState(1);
+  const [apiKeyIndex, setApiKeyIndex] = useState(0);
 
   useEffect(() => {
     const maintenance = currentWeight * 30;
@@ -63,6 +73,7 @@ const CalorieTracker: React.FC<CalorieTrackerProps> = ({
     unit: string,
     category: CategoryOption
   ) => {
+    const currentKey = SPOONACULAR_API_KEYS[apiKeyIndex];
     try {
       const search = await axios.get(
         `https://api.spoonacular.com/food/ingredients/search`,
@@ -70,7 +81,7 @@ const CalorieTracker: React.FC<CalorieTrackerProps> = ({
           params: {
             query: name,
             number: 1,
-            apiKey: SPOONACULAR_API_KEY
+            apiKey: currentKey
           }
         }
       );
@@ -86,7 +97,7 @@ const CalorieTracker: React.FC<CalorieTrackerProps> = ({
           params: {
             amount: amt,
             unit,
-            apiKey: SPOONACULAR_API_KEY
+            apiKey: currentKey
           }
         }
       );
@@ -112,9 +123,15 @@ const CalorieTracker: React.FC<CalorieTrackerProps> = ({
 
       setFoods((prev) => [...prev, newFood]);
       setNextFoodId((prev) => prev + 1);
-    } catch (err) {
-      console.error(err);
-      alert("Error fetching nutrition info. Try again.");
+    } catch (err: any) {
+      if (err.response && (err.response.status === 402 || err.response.status === 429)) {
+        const nextIndex = (apiKeyIndex + 1) % SPOONACULAR_API_KEYS.length;
+        setApiKeyIndex(nextIndex);
+        alert("API Key exhausted. Switched to next key.");
+      } else {
+        console.error(err);
+        alert("Error fetching nutrition info. Try again.");
+      }
     }
   };
 
@@ -153,7 +170,6 @@ const CalorieTracker: React.FC<CalorieTrackerProps> = ({
         Reset Day
       </button>
 
-      {/* 👇 بخش ترک آب */}
       <WaterTracker />
     </div>
   );
