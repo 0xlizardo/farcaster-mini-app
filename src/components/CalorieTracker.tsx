@@ -2,7 +2,8 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { FoodItem, GoalOption, CategoryOption } from "@types";
-import WeightForm from "@components/WeightForm";
+
+import FoodEntry from "@components/FoodEntry";     // ✅ ایمپورت درست
 import FoodList from "@components/FoodList";
 import WaterTracker from "@components/WaterTracker";
 
@@ -26,6 +27,7 @@ const SPOONACULAR_API_KEYS = [
 const CalorieTracker: React.FC<CalorieTrackerProps> = ({
   fid,
   currentWeight,
+  targetWeight,
   goal
 }) => {
   const [dailyCalories, setDailyCalories] = useState(0);
@@ -33,7 +35,7 @@ const CalorieTracker: React.FC<CalorieTrackerProps> = ({
   const [foods, setFoods] = useState<FoodItem[]>([]);
   const [apiKeyIndex, setApiKeyIndex] = useState(0);
 
-  // Calculate dailyCalories...
+  // محاسبه کالری مجاز روزانه
   useEffect(() => {
     const maintenance = currentWeight * 30;
     const calc =
@@ -45,14 +47,14 @@ const CalorieTracker: React.FC<CalorieTrackerProps> = ({
     setDailyCalories(calc < 1200 ? 1200 : calc);
   }, [currentWeight, goal]);
 
-  // Load foods from our API
+  // بارگذاری لیست غذاها از API بک‌اند
   useEffect(() => {
     fetch(`/api/foods?fid=${fid}`)
       .then((r) => r.json())
       .then((docs: any[]) =>
         setFoods(
           docs.map((d) => ({
-            id: d._id,
+            id: d._id as string,
             name: d.name,
             calories: d.calories,
             amount: d.amount,
@@ -65,13 +67,13 @@ const CalorieTracker: React.FC<CalorieTrackerProps> = ({
       .catch(console.error);
   }, [fid]);
 
-  // Recalc remaining
+  // محاسبه کالری باقی مانده
   useEffect(() => {
     const consumed = foods.reduce((sum, f) => sum + f.calories, 0);
     setRemaining(dailyCalories - consumed);
   }, [foods, dailyCalories]);
 
-  // Add new food (search + save via API)
+  // اضافه‌کردن غذا
   const addFood = async (
     name: string,
     amt: number,
@@ -79,30 +81,50 @@ const CalorieTracker: React.FC<CalorieTrackerProps> = ({
     category: CategoryOption
   ) => {
     const key = SPOONACULAR_API_KEYS[apiKeyIndex];
+
     try {
-      // search & info (same as before)...
-      const hit = { name, image: "" }; // default hit object; replace with actual search result if available
-      // build newFood object (without id)
+      const search = await axios.get(
+        "https://api.spoonacular.com/food/ingredients/search",
+        { params: { query: name, number: 1, apiKey: key } }
+      );
+      const hit = search.data.results?.[0];
+      if (!hit) {
+        alert(`No results for "${name}".`);
+        return;
+      }
+
+      const info = await axios.get(
+        `https://api.spoonacular.com/food/ingredients/${hit.id}/information`,
+        { params: { amount: amt, unit, apiKey: key } }
+      );
+
+      const nutrientList = info.data.nutrition?.nutrients || [];
+      const calObj = nutrientList.find(
+        (n: any) => n.name.toLowerCase() === "calories"
+      );
+      const caloriesForGiven = calObj ? calObj.amount : 0;
+
       const imageUrl = hit.image
         ? `https://spoonacular.com/cdn/ingredients_100x100/${hit.image}`
         : undefined;
 
+      // ارسال به بک‌اند برای ذخیره
       const payload = {
         fid,
         name: hit.name,
-        calories: Math.round(amt), // using amt as a placeholder for calories, update calculation as needed
+        calories: Math.round(caloriesForGiven),
         amount: amt,
         unit,
         category,
         image: imageUrl
       };
-
       const res = await fetch("/api/foods", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload)
       });
       const created = await res.json();
+
       setFoods((prev) => [
         {
           id: created._id,
@@ -116,16 +138,20 @@ const CalorieTracker: React.FC<CalorieTrackerProps> = ({
         ...prev
       ]);
     } catch (err: any) {
-      if (err.response && [402, 429].includes(err.response.status)) {
+      if (
+        err.response &&
+        [402, 429].includes(err.response.status)
+      ) {
         setApiKeyIndex((i) => (i + 1) % SPOONACULAR_API_KEYS.length);
-        alert("API Key exhausted—switched to next key");
+        alert("API key quota exhausted, switched to next key.");
       } else {
-        alert("Error fetching nutrition info");
+        console.error(err);
+        alert("Unable to fetch nutrition info.");
       }
     }
   };
 
-  // Remove a food
+  // حذف غذا
   const removeFood = async (id: string) => {
     await fetch(`/api/foods?fid=${fid}&id=${id}`, { method: "DELETE" });
     setFoods((prev) => prev.filter((f) => f.id !== id));
@@ -136,12 +162,9 @@ const CalorieTracker: React.FC<CalorieTrackerProps> = ({
       <h2>Daily Goal: {dailyCalories.toFixed(0)} kcal</h2>
       <h3>Remaining: {remaining.toFixed(0)} kcal</h3>
 
-      <WeightForm onSubmit={(currentWeight, targetWeight, goal) => {
-        // Implementation for weight form submission
-      }} />
+      <FoodEntry onAdd={addFood} />
       <FoodList foods={foods} onRemove={removeFood} />
 
-      {/* WaterTracker now lives here too */}
       <WaterTracker fid={fid} />
     </div>
   );
