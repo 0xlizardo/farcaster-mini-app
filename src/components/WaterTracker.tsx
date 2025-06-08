@@ -1,47 +1,51 @@
-import React, { useState } from "react";
+// src/components/WaterTracker.tsx
+import React, { useState, useEffect } from "react";
 
-const WaterTracker: React.FC = () => {
+interface WaterTrackerProps {
+  fid: string;
+}
+
+const WaterTracker: React.FC<WaterTrackerProps> = ({ fid }) => {
   const [cups, setCups] = useState<number>(0);
 
-  const handleCupClick = (index: number) => {
-    if (cups === index + 1) {
-      setCups(index);
-    } else {
-      setCups(index + 1);
-    }
+  useEffect(() => {
+    fetch(`/api/water?fid=${fid}`)
+      .then((r) => r.json())
+      .then((d) => setCups(d.cups))
+      .catch(console.error);
+  }, [fid]);
+
+  const handleCupClick = (i: number) => {
+    const newCount = cups === i + 1 ? i : i + 1;
+    fetch(`/api/water?fid=${fid}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ cups: newCount })
+    }).catch(console.error);
+    setCups(newCount);
   };
 
   return (
-    <div style={{ marginTop: "20px", textAlign: "center" }}>
+    <div style={{ marginTop: 20, textAlign: "center" }}>
       <h3>Did you drink water?</h3>
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "center",
-          gap: "8px",
-          marginBottom: "12px"
-        }}
-      >
+      <div style={{ display: "flex", justifyContent: "center", gap: 8, marginBottom: 12 }}>
         {Array.from({ length: 8 }).map((_, i) => (
           <div
             key={i}
             onClick={() => handleCupClick(i)}
             style={{
-              width: "30px",
-              height: "50px",
+              width: 30,
+              height: 50,
               border: "2px solid #007bff",
-              borderBottomLeftRadius: "12px",
-              borderBottomRightRadius: "12px",
-              borderTopLeftRadius: "4px",
-              borderTopRightRadius: "4px",
-              backgroundColor: "#fff",
-              cursor: "pointer",
-              transition: "background-color 0.3s",
+              borderBottomLeftRadius: 12,
+              borderBottomRightRadius: 12,
+              borderTopLeftRadius: 4,
+              borderTopRightRadius: 4,
               position: "relative",
-              overflow: "hidden"
+              overflow: "hidden",
+              cursor: "pointer"
             }}
           >
-            {/* شبیه‌سازی سطح آب */}
             <div
               style={{
                 position: "absolute",
@@ -50,8 +54,8 @@ const WaterTracker: React.FC = () => {
                 right: 0,
                 height: i < cups ? "100%" : "0",
                 backgroundColor: "#007bff",
-                borderBottomLeftRadius: "12px",
-                borderBottomRightRadius: "12px",
+                borderBottomLeftRadius: 12,
+                borderBottomRightRadius: 12,
                 transition: "height 0.3s"
               }}
             />

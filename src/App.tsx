@@ -4,10 +4,10 @@ import React, { useState, useEffect } from "react";
 import { sdk } from "@farcaster/frame-sdk";
 import WeightForm from "@components/WeightForm";
 import CalorieTracker from "@components/CalorieTracker";
-import logo from "@assets/logo.png";
-import { GoalOption } from "@types";
 import ActivityEntry from "@components/ActivityEntry";
 import ActivityList from "@components/ActivityList";
+import logo from "@assets/logo.png";
+import { GoalOption } from "@types";
 
 const STORAGE_KEYS = {
   currentWeight: "farfit-currentWeight",
@@ -16,21 +16,32 @@ const STORAGE_KEYS = {
 };
 
 const App: React.FC = () => {
+  const [fid, setFid] = useState<string | null>(null);
   const [currentWeight, setCurrentWeight] = useState<number | null>(null);
   const [targetWeight, setTargetWeight] = useState<number | null>(null);
   const [goal, setGoal] = useState<GoalOption | null>(null);
   const [activeTab, setActiveTab] = useState<"calories" | "activities" | "settings">("calories");
 
-  // handshake
+  // 1) Handshake & fetch FID from frame context
   useEffect(() => {
     (async () => {
       try {
         await sdk.actions.ready({ disableNativeGestures: true });
-      } catch {}
+        const context = await sdk.context;
+        // FID may live on context.fid or context.me.fid depending on version:
+        const userFid = (context as any).fid ?? (context as any).me?.fid;
+        if (userFid != null) {
+          setFid(userFid.toString());
+        } else {
+          console.warn("Unable to read FID from frame context:", context);
+        }
+      } catch (err) {
+        console.error("Error initializing Farcaster SDK:", err);
+      }
     })();
   }, []);
 
-  // load saved weights/goals
+  // 2) Load saved weight & goal from localStorage
   useEffect(() => {
     const cw = localStorage.getItem(STORAGE_KEYS.currentWeight);
     const tw = localStorage.getItem(STORAGE_KEYS.targetWeight);
@@ -43,7 +54,10 @@ const App: React.FC = () => {
   }, []);
 
   const isFormSubmitted =
-    currentWeight !== null && targetWeight !== null && goal !== null;
+    fid !== null &&
+    currentWeight !== null &&
+    targetWeight !== null &&
+    goal !== null;
 
   const handleFormSubmit = (cw: number, tw: number, g: GoalOption) => {
     setCurrentWeight(cw);
@@ -111,6 +125,7 @@ const App: React.FC = () => {
           {activeTab === "calories" && (
             <>
               <CalorieTracker
+                fid={fid!}
                 currentWeight={currentWeight!}
                 targetWeight={targetWeight!}
                 goal={goal!}
@@ -136,6 +151,7 @@ const App: React.FC = () => {
           {activeTab === "activities" && (
             <div>
               <h4 style={{ marginBottom: "16px" }}>Your Activities</h4>
+              {/* Make sure ActivityEntry & ActivityList accept fid as needed */}
               <ActivityEntry weightKg={currentWeight!} onAdd={() => {}} />
               <ActivityList activities={[]} onRemove={() => {}} />
             </div>

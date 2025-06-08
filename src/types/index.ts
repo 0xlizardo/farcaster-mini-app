@@ -1,16 +1,13 @@
+// src/types/index.ts
 export type GoalOption = "lose" | "gain" | "maintain";
-
 export type CategoryOption =
-  | "solid"
-  | "liquid"
-  | "snack"
-  | "fruit"
   | "breakfast"
   | "lunch"
-  | "dinner";
+  | "dinner"
+  | "snack";
 
 export interface FoodItem {
-  id: number;
+  id: string;
   name: string;
   calories: number;
   amount: number;
