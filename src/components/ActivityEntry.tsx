@@ -37,6 +37,83 @@ const ActivityEntry: React.FC<ActivityEntryProps> = ({ weightKg, onAdd }) => {
   };
 
   return (
+<<<<<<< HEAD
+    <form onSubmit={handleSubmit} style={{ 
+      backgroundColor: "#f8f9fa",
+      padding: "20px",
+      borderRadius: "8px",
+      marginBottom: "20px"
+    }}>
+      <div style={{ marginBottom: "16px" }}>
+        <label htmlFor="activity" style={{ 
+          display: "block",
+          marginBottom: "8px",
+          color: "#495057",
+          fontWeight: "500"
+        }}>
+          Select Activity:
+        </label>
+        <select
+          id="activity"
+          value={activityName}
+          onChange={(e) => setActivityName(e.target.value)}
+          style={{
+            width: "100%",
+            padding: "8px",
+            borderRadius: "4px",
+            border: "1px solid #ced4da",
+            backgroundColor: "#fff"
+          }}
+        >
+          {activityOptions.map((opt) => (
+            <option key={opt.name} value={opt.name}>
+              {opt.name}
+            </option>
+          ))}
+        </select>
+      </div>
+
+      <div style={{ marginBottom: "16px" }}>
+        <label htmlFor="duration" style={{ 
+          display: "block",
+          marginBottom: "8px",
+          color: "#495057",
+          fontWeight: "500"
+        }}>
+          Duration (minutes):
+        </label>
+        <input
+          id="duration"
+          type="number"
+          value={duration}
+          onChange={(e) => setDuration(parseInt(e.target.value, 10))}
+          min={1}
+          required
+          style={{
+            width: "100%",
+            padding: "8px",
+            borderRadius: "4px",
+            border: "1px solid #ced4da",
+            backgroundColor: "#fff"
+          }}
+        />
+      </div>
+
+      <button 
+        type="submit"
+        style={{
+          backgroundColor: "#0d6efd",
+          color: "#fff",
+          border: "none",
+          padding: "10px 20px",
+          borderRadius: "4px",
+          cursor: "pointer",
+          width: "100%",
+          fontSize: "1em",
+          fontWeight: "500"
+        }}
+      >
+=======
     <form onSubmit={handleSubmit} style={{ marginTop: "24px" }}>
       <label htmlFor="activity">Activity:</label>
       <select
@@ -62,6 +139,7 @@ const ActivityEntry: React.FC<ActivityEntryProps> = ({ weightKg, onAdd }) => {
       />
 
       <button type="submit" style={{ marginTop: "8px" }}>
+>>>>>>> f8c24e672dd18bd865ec8e7981c98bfb3eb48d82
         Add Activity
       </button>
     </form>
