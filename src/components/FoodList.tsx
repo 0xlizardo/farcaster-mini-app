@@ -3,20 +3,11 @@ import { FoodItem } from "@types";
 
 interface FoodListProps {
   foods: FoodItem[];
-<<<<<<< HEAD
-  onRemove: (id: number) => void;
-=======
   onRemove: (id: string) => void;  // ← updated to accept string
->>>>>>> f8c24e672dd18bd865ec8e7981c98bfb3eb48d82
 }
 
 const FoodList: React.FC<FoodListProps> = ({ foods, onRemove }) => {
   return (
-<<<<<<< HEAD
-    <ul>
-      {foods.map((food) => (
-        <li key={food.id}>
-=======
     <ul style={{ marginTop: 24 }}>
       {(foods.length > 0 ? foods : []).map((food) => (
         <li
@@ -31,20 +22,11 @@ const FoodList: React.FC<FoodListProps> = ({ foods, onRemove }) => {
             marginBottom: "4px"
           }}
         >
->>>>>>> f8c24e672dd18bd865ec8e7981c98bfb3eb48d82
           <div style={{ display: "flex", alignItems: "center" }}>
             {food.image && (
               <img
                 src={food.image}
                 alt={food.name}
-<<<<<<< HEAD
-                style={{ width: "40px", height: "40px", marginRight: "8px", borderRadius: "4px" }}
-              />
-            )}
-            <span>{food.name} - {food.calories} kcal</span>
-          </div>
-          <button onClick={() => onRemove(food.id)}>Remove</button>
-=======
                 style={{
                   width: 40,
                   height: 40,
@@ -70,7 +52,6 @@ const FoodList: React.FC<FoodListProps> = ({ foods, onRemove }) => {
           >
             Remove
           </button>
->>>>>>> f8c24e672dd18bd865ec8e7981c98bfb3eb48d82
         </li>
       ))}
     </ul>

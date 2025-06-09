@@ -1,17 +1,3 @@
-<<<<<<< HEAD
-import React, { useEffect, useState } from "react";
-import axios from "axios";
-import {
-  FoodItem,
-  GoalOption,
-  CategoryOption,
-  ActivityItem
-} from "@types";
-import FoodEntry from "@components/FoodEntry";
-import FoodList from "@components/FoodList";
-import WaterTracker from "@components/WaterTracker";
-import CalorieChart from "@components/CalorieChart";
-=======
 // src/components/CalorieTracker.tsx
 import React, { useEffect, useState } from "react";
 import axios from "axios";
@@ -27,7 +13,6 @@ interface CalorieTrackerProps {
   targetWeight: number;
   goal: GoalOption;
 }
->>>>>>> f8c24e672dd18bd865ec8e7981c98bfb3eb48d82
 
 const SPOONACULAR_API_KEYS = [
   "5b0557bc79364a0fbe2e14c8fa75166c",
@@ -39,37 +24,6 @@ const SPOONACULAR_API_KEYS = [
   "16435a56ebcd47d885c25449a0d8700c"
 ];
 
-<<<<<<< HEAD
-const STORAGE_KEY_FOODS = "farfit-foods";
-
-interface CalorieTrackerProps {
-  currentWeight: number;
-  targetWeight: number;
-  goal: GoalOption;
-  activities: ActivityItem[];
-  foods: FoodItem[];
-  nextFoodId: number;
-  onAddFood: (food: FoodItem) => void;
-  onRemoveFood: (id: number) => void;
-  onResetDay: () => void;
-}
-
-const CalorieTracker: React.FC<CalorieTrackerProps> = ({
-  currentWeight,
-  targetWeight,
-  goal,
-  activities,
-  foods,
-  nextFoodId,
-  onAddFood,
-  onRemoveFood,
-  onResetDay
-}) => {
-  const [dailyCalories, setDailyCalories] = useState(0);
-  const [remaining, setRemaining] = useState(0);
-  const [apiKeyIndex, setApiKeyIndex] = useState(0);
-
-=======
 const CalorieTracker: React.FC<CalorieTrackerProps> = ({
   fid,
   currentWeight,
@@ -82,7 +36,6 @@ const CalorieTracker: React.FC<CalorieTrackerProps> = ({
   const [apiKeyIndex, setApiKeyIndex] = useState(0);
 
   // محاسبه کالری مجاز روزانه
->>>>>>> f8c24e672dd18bd865ec8e7981c98bfb3eb48d82
   useEffect(() => {
     const maintenance = currentWeight * 30;
     const calc =
@@ -94,14 +47,6 @@ const CalorieTracker: React.FC<CalorieTrackerProps> = ({
     setDailyCalories(calc < 1200 ? 1200 : calc);
   }, [currentWeight, goal]);
 
-<<<<<<< HEAD
-  useEffect(() => {
-    const consumed = foods.reduce((sum, f) => sum + f.calories, 0);
-    const burned = activities.reduce((sum, a) => sum + a.caloriesBurned, 0);
-    setRemaining(dailyCalories - consumed + burned);
-  }, [foods, dailyCalories, activities]);
-
-=======
   // بارگذاری لیست غذاها از API بک‌اند
   useEffect(() => {
     fetch(`/api/foods?fid=${fid}`)
@@ -129,33 +74,18 @@ const CalorieTracker: React.FC<CalorieTrackerProps> = ({
   }, [foods, dailyCalories]);
 
   // اضافه‌کردن غذا
->>>>>>> f8c24e672dd18bd865ec8e7981c98bfb3eb48d82
   const addFood = async (
     name: string,
     amt: number,
     unit: string,
     category: CategoryOption
   ) => {
-<<<<<<< HEAD
-    const currentKey = SPOONACULAR_API_KEYS[apiKeyIndex];
-    try {
-      const search = await axios.get(
-        `https://api.spoonacular.com/food/ingredients/search`,
-        {
-          params: {
-            query: name,
-            number: 1,
-            apiKey: currentKey
-          }
-        }
-=======
     const key = SPOONACULAR_API_KEYS[apiKeyIndex];
 
     try {
       const search = await axios.get(
         "https://api.spoonacular.com/food/ingredients/search",
         { params: { query: name, number: 1, apiKey: key } }
->>>>>>> f8c24e672dd18bd865ec8e7981c98bfb3eb48d82
       );
       const hit = search.data.results?.[0];
       if (!hit) {
@@ -165,20 +95,9 @@ const CalorieTracker: React.FC<CalorieTrackerProps> = ({
 
       const info = await axios.get(
         `https://api.spoonacular.com/food/ingredients/${hit.id}/information`,
-<<<<<<< HEAD
-        {
-          params: {
-            amount: amt,
-            unit,
-            apiKey: currentKey
-          }
-        }
-      );
-=======
         { params: { amount: amt, unit, apiKey: key } }
       );
 
->>>>>>> f8c24e672dd18bd865ec8e7981c98bfb3eb48d82
       const nutrientList = info.data.nutrition?.nutrients || [];
       const calObj = nutrientList.find(
         (n: any) => n.name.toLowerCase() === "calories"
@@ -187,37 +106,16 @@ const CalorieTracker: React.FC<CalorieTrackerProps> = ({
 
       const imageUrl = hit.image
         ? `https://spoonacular.com/cdn/ingredients_100x100/${hit.image}`
-<<<<<<< HEAD
-        : null;
-
-      const newFood: FoodItem = {
-        id: nextFoodId,
-=======
         : undefined;
 
       // ارسال به بک‌اند برای ذخیره
       const payload = {
         fid,
->>>>>>> f8c24e672dd18bd865ec8e7981c98bfb3eb48d82
         name: hit.name,
         calories: Math.round(caloriesForGiven),
         amount: amt,
         unit,
         category,
-<<<<<<< HEAD
-        image: imageUrl || undefined
-      };
-
-      onAddFood(newFood);
-    } catch (err: any) {
-      if (err.response && (err.response.status === 402 || err.response.status === 429)) {
-        const nextIndex = (apiKeyIndex + 1) % SPOONACULAR_API_KEYS.length;
-        setApiKeyIndex(nextIndex);
-        alert("API Key exhausted. Switched to next key.");
-      } else {
-        console.error(err);
-        alert("Error fetching nutrition info. Try again.");
-=======
         image: imageUrl
       };
       const res = await fetch("/api/foods", {
@@ -249,55 +147,10 @@ const CalorieTracker: React.FC<CalorieTrackerProps> = ({
       } else {
         console.error(err);
         alert("Unable to fetch nutrition info.");
->>>>>>> f8c24e672dd18bd865ec8e7981c98bfb3eb48d82
       }
     }
   };
 
-<<<<<<< HEAD
-  return (
-    <div>
-      <h2>Daily Calorie Goal: {dailyCalories.toFixed(0)} kcal</h2>
-      <h3>Remaining: {remaining.toFixed(0)} kcal</h3>
-      {activities.length > 0 && (
-        <div style={{ 
-          backgroundColor: "#e8f5e9",
-          padding: "12px",
-          borderRadius: "8px",
-          marginBottom: "16px"
-        }}>
-          <p style={{ margin: 0, color: "#2e7d32" }}>
-            🔥 Total calories burned today: {activities.reduce((sum, a) => sum + a.caloriesBurned, 0)} kcal
-          </p>
-        </div>
-      )}
-
-      <CalorieChart 
-        dailyCalories={dailyCalories}
-        consumed={foods.reduce((sum, f) => sum + f.calories, 0)}
-        burned={activities.reduce((sum, a) => sum + a.caloriesBurned, 0)}
-      />
-
-      <FoodEntry onAdd={addFood} />
-      <FoodList foods={foods} onRemove={onRemoveFood} />
-
-      <button
-        onClick={onResetDay}
-        style={{
-          marginTop: 20,
-          backgroundColor: "#dc3545",
-          color: "#fff",
-          padding: "8px 16px",
-          border: "none",
-          borderRadius: 4,
-          cursor: "pointer"
-        }}
-      >
-        Reset Day
-      </button>
-
-      <WaterTracker />
-=======
   // حذف غذا
   const removeFood = async (id: string) => {
     await fetch(`/api/foods?fid=${fid}&id=${id}`, { method: "DELETE" });
@@ -313,7 +166,6 @@ const CalorieTracker: React.FC<CalorieTrackerProps> = ({
       <FoodList foods={foods} onRemove={removeFood} />
 
       <WaterTracker fid={fid} />
->>>>>>> f8c24e672dd18bd865ec8e7981c98bfb3eb48d82
     </div>
   );
 };
