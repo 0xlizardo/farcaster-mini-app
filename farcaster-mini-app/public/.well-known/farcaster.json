@@ -1,0 +1,21 @@
+{
+  "accountAssociation": {
+    "header": "eyJmaWQiOjUwMjU2OCwidHlwZSI6ImN1c3RvZHkiLCJrZXkiOiIweDVjQWMwRUFBNjMxZkNlZmVCNDVmMGQzMDZlMzg0NjBDMUFBNzY0ZDYifQ",
+    "payload": "eyJkb21haW4iOiJmYXJjYXN0ZXItbWluaS1hcHAtb25lLnZlcmNlbC5hcHAifQ",
+    "signature": "MHg0ODM2MTIwMDdlZmQ4ZDJiMmRhODZlN2JiOTJmMDFjNjJkNWExOGI5YjM4MmE0ODZlZTBkNzUwY2JmYTlhNThjNGJhYTUzNTk4ZDAzZjE2YzhiMmVkNzhmNjk3YjQ0NDExNTE5ZjYxZDgxMGY1MmQ5ODYwYTMyZjA0OWVkYTAwZTFi"
+  },
+  "frame": {
+    "version": "1",
+    "name": "FarFit",
+    "iconUrl": "https://farcaster-mini-app-one.vercel.app/icon.png",
+    "homeUrl": "https://farcaster-mini-app-one.vercel.app",
+    "imageUrl": "https://farcaster-mini-app-one.vercel.app/preview.jpg",
+    "buttonTitle": "Launch FarFit",
+    "splashImageUrl": "https://farcaster-mini-app-one.vercel.app/logo.png",
+    "splashBackgroundColor": "#f7f7f7",
+    "embed": {
+      "html": "<iframe src=\"https://farcaster-mini-app-one.vercel.app\" onload=\"(window.parent||window.top).postMessage({type:'farcaster:frameLoaded'},'*');\" style=\"border:none;width:100%;height:100%;\" sandbox=\"allow-scripts allow-same-origin\"></iframe>"
+    },
+    "webhookUrl": "https://farcaster-mini-app-one.vercel.app/api/webhook"
+  }
+}
