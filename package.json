@@ -5,8 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "prebuild": "node -e \"try { require('fs').chmodSync('./node_modules/.bin/vite', '755') } catch (e) { console.log('Cannot chmod on non-Linux systems') }\"",
-    "build": "npx vite build",
+    "build": "vite build --emptyOutDir",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview",
     "test": "vitest"
