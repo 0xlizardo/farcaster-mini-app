@@ -226,7 +226,7 @@ const CalorieTracker: React.FC<CalorieTrackerProps> = ({
         <h3 className="text-xl text-gray-800 mb-3 text-center">
           Daily Calorie Distribution
         </h3>
-        <div className="grid grid-cols-2 gap-2 px-2 max-w-md mx-auto">
+        <div className="grid grid-cols-2 gap-4 px-2 max-w-md mx-auto">
           <MealProgressComponent progress={getMealProgress("breakfast")} />
           <MealProgressComponent progress={getMealProgress("lunch")} />
           <MealProgressComponent progress={getMealProgress("dinner")} />
