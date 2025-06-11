@@ -56,11 +56,11 @@ const MealProgress: React.FC<MealProgressProps> = ({ progress }) => {
 
   return (
     <div
-      className={`rounded-2xl p-2.5 shadow-lg w-40 h-40 flex flex-col justify-between ${getMealColor(
+      className={`rounded-2xl p-2.5 shadow-lg w-full max-w-[160px] h-40 flex flex-col justify-between ${getMealColor(
         mealType
       )}`}
     >
-      <div className="flex items-center mb-1.5">
+      <div className="flex items-center mb-1">
         <div className="w-12 h-12 rounded-lg bg-white flex items-center justify-center mr-2 shadow-md">
           <span className="text-3xl">{getMealEmoji(mealType)}</span>
         </div>
@@ -85,7 +85,7 @@ const MealProgress: React.FC<MealProgressProps> = ({ progress }) => {
         </div>
       </div>
 
-      <div className="grid grid-cols-2 gap-1.5 bg-white p-1.5 rounded-lg shadow-inner">
+      <div className="grid grid-cols-2 gap-1 bg-white p-1 rounded-lg shadow-inner">
         <div className="text-center">
           <div className="text-base text-gray-600">Consumed</div>
           <div className="text-xl font-bold text-gray-800">
