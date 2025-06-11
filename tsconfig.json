@@ -15,20 +15,21 @@
     "isolatedModules": true,
     "noEmit": true,
     "jsx": "react-jsx",
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noFallthroughCasesInSwitch": true,
 
-    // ← Project‐wide path mappings
+    // Project‐wide path mappings
     "baseUrl": ".",
     "paths": {
       "@components/*": ["src/components/*"],
-      "@assets/*":     ["src/assets/*"],
-      "@types":        ["src/types/index.ts"],     // root import
-      "@types/*":      ["src/types/*"]             // wildcard imports
+      "@assets/*": ["src/assets/*"],
+      "@types": ["src/types/index.ts"],
+      "@types/*": ["src/types/*"]
     },
 
-    // Tell TS about Node and Vite types (for import.meta.url, etc.)
+    // Tell TS about Node and Vite types
     "types": ["node", "vite/client"]
   },
-
-  // ← Include your source code + type declarations
   "include": ["src", "src/types"]
 }

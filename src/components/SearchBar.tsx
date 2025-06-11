@@ -1,74 +1,4 @@
 import React, { useState, ChangeEvent } from "react";
-import styled from "styled-components";
-
-const SearchContainer = styled.form`
-  position: relative;
-  width: 100%;
-  max-width: 600px;
-  margin: 0 auto;
-`;
-
-const SearchWrapper = styled.div`
-  position: relative;
-  display: flex;
-  align-items: center;
-  background: linear-gradient(145deg, #ffffff, #f5f5f5);
-  border-radius: 50px;
-  padding: 4px;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-  border: 1px solid rgba(0, 0, 0, 0.05);
-  transition: all 0.3s ease;
-`;
-
-const SearchInput = styled.input`
-  flex: 1;
-  border: none;
-  outline: none;
-  padding: 12px 20px;
-  font-size: 16px;
-  background: transparent;
-  color: #2c3e50;
-  border-radius: 50px;
-  transition: all 0.3s ease;
-
-  &::placeholder {
-    color: #95a5a6;
-  }
-
-  &:focus {
-    box-shadow: 0 0 0 2px rgba(76, 175, 80, 0.2);
-  }
-`;
-
-const SearchButton = styled.button`
-  background: linear-gradient(145deg, #4CAF50, #45a049);
-  border: none;
-  border-radius: 50px;
-  padding: 12px 25px;
-  color: white;
-  font-size: 16px;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-
-  &:hover {
-    background: linear-gradient(145deg, #45a049, #3d8b40);
-    transform: translateY(-1px);
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
-  }
-
-  &:active {
-    transform: translateY(0);
-    box-shadow: 0 2px 3px rgba(0, 0, 0, 0.1);
-  }
-`;
-
-const SearchIcon = styled.span`
-  margin-right: 4px;
-`;
 
 interface SearchBarProps {
   onSearch: (query: string) => void;
@@ -87,20 +17,24 @@ const SearchBar: React.FC<SearchBarProps> = ({
   };
 
   return (
-    <SearchContainer onSubmit={handleSubmit}>
-      <SearchWrapper>
-        <SearchInput
+    <form onSubmit={handleSubmit} className="relative w-full max-w-lg mx-auto">
+      <div className="relative flex items-center bg-gradient-to-br from-white to-gray-100 rounded-full p-1 shadow-lg border border-gray-200 transition-all duration-300">
+        <input
           type="text"
           value={query}
           onChange={(e: ChangeEvent<HTMLInputElement>) => setQuery(e.target.value)}
           placeholder={placeholder}
+          className="flex-1 border-none outline-none py-3 px-5 text-base bg-transparent text-gray-800 rounded-full transition-all duration-300 placeholder-gray-400 focus:ring-2 focus:ring-green-200"
         />
-        <SearchButton type="submit">
-          <SearchIcon>🔍</SearchIcon>
+        <button
+          type="submit"
+          className="bg-gradient-to-br from-green-500 to-green-600 border-none rounded-full py-3 px-6 text-white text-base cursor-pointer transition-all duration-300 flex items-center gap-2 shadow-md hover:from-green-600 hover:to-green-700 hover:-translate-y-px hover:shadow-lg active:translate-y-0 active:shadow-md"
+        >
+          <span className="mr-1">🔍</span>
           Search
-        </SearchButton>
-      </SearchWrapper>
-    </SearchContainer>
+        </button>
+      </div>
+    </form>
   );
 };
 

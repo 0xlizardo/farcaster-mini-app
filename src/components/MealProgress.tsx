@@ -5,148 +5,103 @@ interface MealProgressProps {
   progress: MealProgressType;
 }
 
+const getMealEmoji = (type: string) => {
+  switch (type) {
+    case "breakfast":
+      return "🍳";
+    case "lunch":
+      return "🍱";
+    case "dinner":
+      return "🍽️";
+    case "snack":
+      return "🍎";
+    default:
+      return "🍴";
+  }
+};
+
+const getMealName = (type: string) => {
+  switch (type) {
+    case "breakfast":
+      return "Breakfast";
+    case "lunch":
+      return "Lunch";
+    case "dinner":
+      return "Dinner";
+    case "snack":
+      return "Snack";
+    default:
+      return type;
+  }
+};
+
+const getMealColor = (type: string) => {
+  switch (type) {
+    case "breakfast":
+      return "bg-orange-200";
+    case "lunch":
+      return "bg-blue-200";
+    case "dinner":
+      return "bg-purple-200";
+    case "snack":
+      return "bg-green-200";
+    default:
+      return "bg-gray-100";
+  }
+};
+
 const MealProgress: React.FC<MealProgressProps> = ({ progress }) => {
   const { mealType, target, consumed, remaining } = progress;
-  const percentage = (consumed / target) * 100;
-
-  const getMealEmoji = (type: string) => {
-    switch (type) {
-      case "breakfast":
-        return "🍳";
-      case "lunch":
-        return "🍱";
-      case "dinner":
-        return "🍽️";
-      case "snack":
-        return "🍎";
-      default:
-        return "🍴";
-    }
-  };
-
-  const getMealName = (type: string) => {
-    switch (type) {
-      case "breakfast":
-        return "Breakfast";
-      case "lunch":
-        return "Lunch";
-      case "dinner":
-        return "Dinner";
-      case "snack":
-        return "Snack";
-      default:
-        return type;
-    }
-  };
-
-  const getMealColor = (type: string) => {
-    switch (type) {
-      case "breakfast":
-        return "#FFE4B5"; // Light orange
-      case "lunch":
-        return "#E6F3FF"; // Light blue
-      case "dinner":
-        return "#F0E6FF"; // Light purple
-      case "snack":
-        return "#E6FFE6"; // Light green
-      default:
-        return "#f8f9fa";
-    }
-  };
+  const percentage = target > 0 ? (consumed / target) * 100 : 0;
 
   return (
     <div
-      style={{
-        backgroundColor: getMealColor(mealType),
-        borderRadius: "19px",
-        padding: "10px",
-        boxShadow: "0 2px 4px rgba(0, 0, 0, 0.1)",
-        width: "192px",
-        height: "192px",
-        display: "flex",
-        flexDirection: "column",
-        justifyContent: "space-between"
-      }}
+      className={`rounded-2xl p-2.5 shadow-lg w-48 h-48 flex flex-col justify-between ${getMealColor(
+        mealType
+      )}`}
     >
-      <div style={{ display: "flex", alignItems: "center", marginBottom: "5px" }}>
-        <div
-          style={{
-            width: "58px",
-            height: "58px",
-            borderRadius: "10px",
-            backgroundColor: "white",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            marginRight: "10px",
-            boxShadow: "0 2px 4px rgba(0, 0, 0, 0.1)"
-          }}
-        >
-          <span style={{ fontSize: "34px" }}>{getMealEmoji(mealType)}</span>
+      <div className="flex items-center mb-1.5">
+        <div className="w-14 h-14 rounded-lg bg-white flex items-center justify-center mr-2.5 shadow-md">
+          <span className="text-4xl">{getMealEmoji(mealType)}</span>
         </div>
         <div>
-          <h3 style={{ margin: 0, fontSize: "26px", color: "#2c3e50" }}>
+          <h3 className="m-0 text-2xl text-gray-800">
             {getMealName(mealType)}
           </h3>
-          <p style={{ margin: "0", fontSize: "22px", color: "#666" }}>
+          <p className="m-0 text-xl text-gray-600">
             Target: {target} cal
           </p>
         </div>
       </div>
 
-      <div style={{ marginBottom: "5px" }}>
-        <div
-          style={{
-            width: "100%",
-            height: "14px",
-            backgroundColor: "rgba(255, 255, 255, 0.8)",
-            borderRadius: "7px",
-            overflow: "hidden"
-          }}
-        >
+      <div className="mb-1.5">
+        <div className="w-full h-3.5 bg-white bg-opacity-80 rounded-full overflow-hidden">
           <div
-            style={{
-              width: `${percentage}%`,
-              height: "100%",
-              backgroundColor: percentage > 100 ? "#dc3545" : "#28a745",
-              transition: "width 0.3s ease",
-              borderRadius: "7px"
-            }}
+            className={`h-full rounded-full transition-all duration-300 ${
+              percentage > 100 ? "bg-red-500" : "bg-green-500"
+            }`}
+            style={{ width: `${Math.min(percentage, 100)}%` }}
           />
         </div>
       </div>
 
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "repeat(2, 1fr)",
-          gap: "5px",
-          backgroundColor: "white",
-          padding: "5px",
-          borderRadius: "7px",
-          boxShadow: "0 2px 4px rgba(0, 0, 0, 0.05)"
-        }}
-      >
-        <div style={{ textAlign: "center" }}>
-          <div style={{ fontSize: "19px", color: "#666", marginBottom: "0" }}>
-            Consumed
-          </div>
-          <div style={{ fontSize: "24px", fontWeight: "bold", color: "#2c3e50" }}>
+      <div className="grid grid-cols-2 gap-1.5 bg-white p-1.5 rounded-lg shadow-inner">
+        <div className="text-center">
+          <div className="text-lg text-gray-600">Consumed</div>
+          <div className="text-2xl font-bold text-gray-800">
             {consumed}
           </div>
         </div>
-        <div style={{ textAlign: "center" }}>
-          <div style={{ fontSize: "19px", color: "#666", marginBottom: "0" }}>
+        <div className="text-center">
+          <div className="text-lg text-gray-600">
             {remaining >= 0 ? "Remaining" : "Excess"}
           </div>
           <div
-            style={{
-              fontSize: "24px",
-              fontWeight: "bold",
-              color: remaining < 0 ? "#dc3545" : "#28a745"
-            }}
+            className={`text-2xl font-bold ${
+              remaining < 0 ? "text-red-500" : "text-green-500"
+            }`}
           >
-            {remaining >= 0 ? remaining : -remaining}
+            {Math.abs(remaining)}
           </div>
         </div>
       </div>

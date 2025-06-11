@@ -17,6 +17,17 @@ const STORAGE_KEYS = {
   foods: "farfit-foods"
 };
 
+const validateStorageData = (data: any, key: string) => {
+  try {
+    if (!data) return null;
+    const parsed = typeof data === 'string' ? JSON.parse(data) : data;
+    return parsed;
+  } catch (error) {
+    console.error(`Error parsing ${key} from localStorage:`, error);
+    return null;
+  }
+};
+
 const App: React.FC = () => {
   const [currentWeight, setCurrentWeight] = useState<number | null>(null);
   const [targetWeight, setTargetWeight] = useState<number | null>(null);
@@ -25,6 +36,8 @@ const App: React.FC = () => {
   const [activities, setActivities] = useState<ActivityItem[]>([]);
   const [foods, setFoods] = useState<FoodItem[]>([]);
   const [nextFoodId, setNextFoodId] = useState(1);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   // handshake
   useEffect(() => {
@@ -37,45 +50,57 @@ const App: React.FC = () => {
 
   // Load saved data only once on mount
   useEffect(() => {
-    const cw = localStorage.getItem(STORAGE_KEYS.currentWeight);
-    const tw = localStorage.getItem(STORAGE_KEYS.targetWeight);
-    const gl = localStorage.getItem(STORAGE_KEYS.goal);
-    const savedActivities = localStorage.getItem(STORAGE_KEYS.activities);
-    const savedFoods = localStorage.getItem(STORAGE_KEYS.foods);
+    try {
+      const cw = validateStorageData(localStorage.getItem(STORAGE_KEYS.currentWeight), 'currentWeight');
+      const tw = validateStorageData(localStorage.getItem(STORAGE_KEYS.targetWeight), 'targetWeight');
+      const gl = validateStorageData(localStorage.getItem(STORAGE_KEYS.goal), 'goal');
+      const savedActivities = validateStorageData(localStorage.getItem(STORAGE_KEYS.activities), 'activities');
+      const savedFoods = validateStorageData(localStorage.getItem(STORAGE_KEYS.foods), 'foods');
 
-    if (cw && tw && gl) {
-      setCurrentWeight(parseFloat(cw));
-      setTargetWeight(parseFloat(tw));
-      setGoal(gl as GoalOption);
-    }
+      if (cw && tw && gl) {
+        setCurrentWeight(Number(cw));
+        setTargetWeight(Number(tw));
+        setGoal(gl as GoalOption);
+      }
 
-    if (savedActivities) {
-      try {
-        setActivities(JSON.parse(savedActivities));
-      } catch {}
-    }
+      if (savedActivities && Array.isArray(savedActivities)) {
+        setActivities(savedActivities);
+      }
 
-    if (savedFoods) {
-      try {
-        const parsed: FoodItem[] = JSON.parse(savedFoods);
-        setFoods(parsed);
-        const max = parsed.reduce((m, f) => Math.max(m, f.id), 0);
+      if (savedFoods && Array.isArray(savedFoods)) {
+        setFoods(savedFoods);
+        const max = savedFoods.reduce((m, f) => Math.max(m, f.id), 0);
         setNextFoodId(max + 1);
-      } catch {}
+      }
+    } catch (error) {
+      console.error('Error loading data from localStorage:', error);
+      setError('Failed to load saved data. Please try refreshing the page.');
+    } finally {
+      setIsLoading(false);
     }
   }, []);
 
   // Save activities to localStorage
   useEffect(() => {
-    if (activities.length > 0) {
-      localStorage.setItem(STORAGE_KEYS.activities, JSON.stringify(activities));
+    try {
+      if (activities.length > 0) {
+        localStorage.setItem(STORAGE_KEYS.activities, JSON.stringify(activities));
+      }
+    } catch (error) {
+      console.error('Error saving activities to localStorage:', error);
+      setError('Failed to save activities. Please try again.');
     }
   }, [activities]);
 
   // Save foods to localStorage
   useEffect(() => {
-    if (foods.length > 0) {
-      localStorage.setItem(STORAGE_KEYS.foods, JSON.stringify(foods));
+    try {
+      if (foods.length > 0) {
+        localStorage.setItem(STORAGE_KEYS.foods, JSON.stringify(foods));
+      }
+    } catch (error) {
+      console.error('Error saving foods to localStorage:', error);
+      setError('Failed to save foods. Please try again.');
     }
   }, [foods]);
 
@@ -83,13 +108,18 @@ const App: React.FC = () => {
     currentWeight !== null && targetWeight !== null && goal !== null;
 
   const handleFormSubmit = (cw: number, tw: number, g: GoalOption) => {
-    setCurrentWeight(cw);
-    setTargetWeight(tw);
-    setGoal(g);
-    localStorage.setItem(STORAGE_KEYS.currentWeight, cw.toString());
-    localStorage.setItem(STORAGE_KEYS.targetWeight, tw.toString());
-    localStorage.setItem(STORAGE_KEYS.goal, g);
-    setActiveTab("calories");
+    try {
+      setCurrentWeight(cw);
+      setTargetWeight(tw);
+      setGoal(g);
+      localStorage.setItem(STORAGE_KEYS.currentWeight, cw.toString());
+      localStorage.setItem(STORAGE_KEYS.targetWeight, tw.toString());
+      localStorage.setItem(STORAGE_KEYS.goal, g);
+      setActiveTab("calories");
+    } catch (error) {
+      console.error('Error saving form data:', error);
+      setError('Failed to save your information. Please try again.');
+    }
   };
 
   const handleAddActivity = (activity: ActivityItem) => {
@@ -110,19 +140,44 @@ const App: React.FC = () => {
   };
 
   const resetDay = () => {
-    if (window.confirm("Clear day's data?")) {
-      localStorage.removeItem(STORAGE_KEYS.activities);
-      localStorage.removeItem(STORAGE_KEYS.foods);
-      setActivities([]);
-      setFoods([]);
-      setNextFoodId(1);
+    if (window.confirm("Are you sure you want to clear today's data? This action cannot be undone.")) {
+      try {
+        localStorage.removeItem(STORAGE_KEYS.activities);
+        localStorage.removeItem(STORAGE_KEYS.foods);
+        setActivities([]);
+        setFoods([]);
+        setNextFoodId(1);
+      } catch (error) {
+        console.error('Error resetting day:', error);
+        setError('Failed to reset data. Please try again.');
+      }
     }
   };
 
+  if (isLoading) {
+    return (
+      <div className="text-center p-5">
+        <p>Loading your data...</p>
+      </div>
+    );
+  }
+
   return (
-    <div className="container">
-      <header style={{ textAlign: "center", marginBottom: "24px" }}>
-        <img src={logo} alt="FarFit Logo" style={{ maxWidth: "120px" }} />
+    <div className="container mx-auto p-4">
+      {error && (
+        <div className="bg-red-100 text-red-700 p-3 rounded-lg mb-4 text-center">
+          {error}
+          <button
+            onClick={() => setError(null)}
+            className="ml-2 px-2 py-1 bg-red-700 text-white rounded-md cursor-pointer"
+          >
+            Dismiss
+          </button>
+        </div>
+      )}
+
+      <header className="text-center mb-6">
+        <img src={logo} alt="FarFit Logo" className="max-w-[120px] mx-auto" />
       </header>
 
       {!isFormSubmitted ? (
@@ -130,42 +185,34 @@ const App: React.FC = () => {
       ) : (
         <>
           {/* Tabs */}
-          <div style={{ display: "flex", justifyContent: "center", marginBottom: "16px" }}>
+          <div className="flex justify-center mb-4">
             <button
               onClick={() => setActiveTab("calories")}
-              style={{
-                padding: "8px 16px",
-                cursor: "pointer",
-                backgroundColor: activeTab === "calories" ? "#0d6efd" : "#e9ecef",
-                color: activeTab === "calories" ? "#fff" : "#000",
-                border: "none",
-                borderRadius: "4px 0 0 4px"
-              }}
+              className={`px-4 py-2 cursor-pointer rounded-l-md ${
+                activeTab === "calories"
+                  ? "bg-blue-600 text-white"
+                  : "bg-gray-200 text-black"
+              }`}
             >
               Calories
             </button>
             <button
               onClick={() => setActiveTab("activities")}
-              style={{
-                padding: "8px 16px",
-                cursor: "pointer",
-                backgroundColor: activeTab === "activities" ? "#0d6efd" : "#e9ecef",
-                color: activeTab === "activities" ? "#fff" : "#000",
-                border: "none"
-              }}
+              className={`px-4 py-2 cursor-pointer ${
+                activeTab === "activities"
+                  ? "bg-blue-600 text-white"
+                  : "bg-gray-200 text-black"
+              }`}
             >
               Activities
             </button>
             <button
               onClick={() => setActiveTab("settings")}
-              style={{
-                padding: "8px 16px",
-                cursor: "pointer",
-                backgroundColor: activeTab === "settings" ? "#0d6efd" : "#e9ecef",
-                color: activeTab === "settings" ? "#fff" : "#000",
-                border: "none",
-                borderRadius: "0 4px 4px 0"
-              }}
+              className={`px-4 py-2 cursor-pointer rounded-r-md ${
+                activeTab === "settings"
+                  ? "bg-blue-600 text-white"
+                  : "bg-gray-200 text-black"
+              }`}
             >
               Settings
             </button>
@@ -185,34 +232,48 @@ const App: React.FC = () => {
                 onRemoveFood={handleRemoveFood}
                 onResetDay={resetDay}
               />
-              <div style={{ marginTop: "16px", textAlign: "center" }}>
+              <div className="mt-4 text-center">
                 <button
                   onClick={() => setActiveTab("activities")}
-                  style={{
-                    backgroundColor: "#6c757d",
-                    color: "#fff",
-                    border: "none",
-                    padding: "8px 16px",
-                    borderRadius: "4px",
-                    cursor: "pointer"
-                  }}
+                  className="bg-gray-500 text-white px-4 py-2 rounded-md cursor-pointer"
                 >
-                  Log an Activity
+                  Track Activity
                 </button>
               </div>
             </>
           )}
 
           {activeTab === "activities" && (
-            <div>
-              <h4 style={{ marginBottom: "16px" }}>Your Activities</h4>
-              <ActivityEntry weightKg={currentWeight!} onAdd={handleAddActivity} />
-              <ActivityList activities={activities} onRemove={handleRemoveActivity} />
-            </div>
+            <>
+              <ActivityEntry 
+                weightKg={currentWeight || 0} 
+                onAdd={handleAddActivity} 
+              />
+              <ActivityList
+                activities={activities}
+                onRemove={handleRemoveActivity}
+              />
+              <div className="mt-4 text-center">
+                <button
+                  onClick={() => setActiveTab("calories")}
+                  className="bg-gray-500 text-white px-4 py-2 rounded-md cursor-pointer"
+                >
+                  Back to Calories
+                </button>
+              </div>
+            </>
           )}
 
           {activeTab === "settings" && (
-            <WeightForm onSubmit={handleFormSubmit} />
+            <div className="text-center">
+              <h3 className="text-xl font-bold">Settings</h3>
+              <button
+                onClick={resetDay}
+                className="bg-red-600 text-white px-4 py-2 rounded-md cursor-pointer mt-4"
+              >
+                Reset Day's Data
+              </button>
+            </div>
           )}
         </>
       )}

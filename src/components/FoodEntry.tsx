@@ -1,7 +1,6 @@
 // src/components/FoodEntry.tsx
 
-import React, { useState, useEffect, useRef } from "react";
-import axios from "axios";
+import React, { useState, useRef } from "react";
 import { CategoryOption, MealType } from "@types";
 
 interface FoodEntryProps {
@@ -13,8 +12,6 @@ interface FoodEntryProps {
     mealType: MealType
   ) => void;
 }
-
-const SPOONACULAR_API_KEY = "87856d33a46b4d97aef088f2f5b58c48";
 
 const unitOptions = [
   { value: "gram", label: "grams (g)" },
@@ -43,57 +40,11 @@ const mealTypeOptions: { value: MealType; label: string }[] = [
 
 const FoodEntry: React.FC<FoodEntryProps> = ({ onAdd }) => {
   const [foodInput, setFoodInput] = useState("");
-  const [suggestions, setSuggestions] = useState<string[]>([]);
-  const [showSuggestions, setShowSuggestions] = useState(false);
   const [amount, setAmount] = useState(1);
   const [unit, setUnit] = useState("gram");
   const [category, setCategory] = useState<CategoryOption>("solid");
   const [mealType, setMealType] = useState<MealType>("breakfast");
   const wrapperRef = useRef<HTMLDivElement>(null);
-
-  // fetch live search suggestions
-  useEffect(() => {
-    if (foodInput.length < 2) {
-      setSuggestions([]);
-      return;
-    }
-    const timeout = setTimeout(async () => {
-      try {
-        const resp = await axios.get(
-          `https://api.spoonacular.com/food/ingredients/search`,
-          {
-            params: {
-              query: foodInput,
-              number: 5,
-              apiKey: SPOONACULAR_API_KEY
-            }
-          }
-        );
-        setSuggestions(resp.data.results.map((r: any) => r.name));
-        setShowSuggestions(true);
-      } catch {
-        setSuggestions([]);
-        setShowSuggestions(false);
-      }
-    }, 300);
-    return () => clearTimeout(timeout);
-  }, [foodInput]);
-
-  // close suggestions on outside click
-  useEffect(() => {
-    const handleClick = (e: MouseEvent) => {
-      if (wrapperRef.current && !wrapperRef.current.contains(e.target as Node)) {
-        setShowSuggestions(false);
-      }
-    };
-    document.addEventListener("mousedown", handleClick);
-    return () => document.removeEventListener("mousedown", handleClick);
-  }, []);
-
-  const handleSelect = (name: string) => {
-    setFoodInput(name);
-    setShowSuggestions(false);
-  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -112,56 +63,27 @@ const FoodEntry: React.FC<FoodEntryProps> = ({ onAdd }) => {
     setUnit("gram");
     setCategory("solid");
     setMealType("breakfast");
-    setSuggestions([]);
   };
 
   return (
-    <form onSubmit={handleSubmit} style={{ marginTop: 24 }}>
-      <div ref={wrapperRef} style={{ position: "relative" }}>
-        <label htmlFor="foodName">Food Name:</label>
+    <form onSubmit={handleSubmit} className="mt-6">
+      <div ref={wrapperRef} className="relative">
+        <label htmlFor="foodName" className="block text-sm font-medium text-gray-700">Food Name:</label>
         <input
           id="foodName"
           type="text"
           value={foodInput}
           onChange={(e) => setFoodInput(e.target.value)}
-          placeholder="Type to search..."
+          placeholder="e.g. Apple"
           autoComplete="off"
           required
+          className="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
         />
-        {showSuggestions && suggestions.length > 0 && (
-          <ul
-            style={{
-              position: "absolute",
-              top: "100%",
-              left: 0,
-              right: 0,
-              background: "#fff",
-              border: "1px solid #ccc",
-              maxHeight: 150,
-              overflowY: "auto",
-              listStyle: "none",
-              margin: 0,
-              padding: 0,
-              zIndex: 10
-            }}
-          >
-            {suggestions.map((s) => (
-              <li
-                key={s}
-                onClick={() => handleSelect(s)}
-                onMouseDown={(e) => e.preventDefault()}
-                style={{ padding: 8, cursor: "pointer" }}
-              >
-                {s}
-              </li>
-            ))}
-          </ul>
-        )}
       </div>
 
-      <div style={{ display: "flex", gap: 8, marginTop: 12 }}>
-        <div style={{ flex: 1 }}>
-          <label htmlFor="amount">Amount:</label>
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-4">
+        <div>
+          <label htmlFor="amount" className="block text-sm font-medium text-gray-700">Amount:</label>
           <input
             id="amount"
             type="number"
@@ -170,14 +92,16 @@ const FoodEntry: React.FC<FoodEntryProps> = ({ onAdd }) => {
             min="0.1"
             step="0.1"
             required
+            className="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
           />
         </div>
-        <div style={{ flex: 1 }}>
-          <label htmlFor="unit">Unit:</label>
+        <div>
+          <label htmlFor="unit" className="block text-sm font-medium text-gray-700">Unit:</label>
           <select
             id="unit"
             value={unit}
             onChange={(e) => setUnit(e.target.value)}
+            className="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
           >
             {unitOptions.map((o) => (
               <option key={o.value} value={o.value}>
@@ -186,12 +110,13 @@ const FoodEntry: React.FC<FoodEntryProps> = ({ onAdd }) => {
             ))}
           </select>
         </div>
-        <div style={{ flex: 1 }}>
-          <label htmlFor="category">Food Type:</label>
+        <div>
+          <label htmlFor="category" className="block text-sm font-medium text-gray-700">Food Type:</label>
           <select
             id="category"
             value={category}
             onChange={(e) => setCategory(e.target.value as CategoryOption)}
+            className="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
           >
             {categoryOptions.map((o) => (
               <option key={o.value} value={o.value}>
@@ -200,12 +125,13 @@ const FoodEntry: React.FC<FoodEntryProps> = ({ onAdd }) => {
             ))}
           </select>
         </div>
-        <div style={{ flex: 1 }}>
-          <label htmlFor="mealType">Meal Type:</label>
+        <div>
+          <label htmlFor="mealType" className="block text-sm font-medium text-gray-700">Meal Type:</label>
           <select
             id="mealType"
             value={mealType}
             onChange={(e) => setMealType(e.target.value as MealType)}
+            className="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
           >
             {mealTypeOptions.map((o) => (
               <option key={o.value} value={o.value}>
@@ -216,7 +142,7 @@ const FoodEntry: React.FC<FoodEntryProps> = ({ onAdd }) => {
         </div>
       </div>
 
-      <button type="submit" style={{ marginTop: 16 }}>
+      <button type="submit" className="mt-4 w-full bg-blue-600 text-white p-3 rounded-md hover:bg-blue-700 transition">
         Add
       </button>
     </form>

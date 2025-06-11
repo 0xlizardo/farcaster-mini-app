@@ -12,52 +12,29 @@ const ActivityList: React.FC<ActivityListProps> = ({
 }) => {
   if (activities.length === 0) {
     return (
-      <div style={{
-        textAlign: "center",
-        padding: "20px",
-        backgroundColor: "#f8f9fa",
-        borderRadius: "8px",
-        marginTop: "16px"
-      }}>
-        <p style={{ color: "#6c757d", margin: 0 }}>No activities logged yet.</p>
+      <div className="text-center p-5 bg-gray-100 rounded-lg mt-4">
+        <p className="text-gray-500 m-0">No activities logged yet.</p>
       </div>
     );
   }
 
   return (
-    <div style={{ marginTop: "16px" }}>
+    <div className="mt-4">
       {activities.map((act) => (
         <div
           key={act.id}
-          style={{
-            backgroundColor: "#fff",
-            borderRadius: "8px",
-            padding: "12px",
-            marginBottom: "8px",
-            boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center"
-          }}
+          className="bg-white rounded-lg p-3 mb-2 shadow flex justify-between items-center"
         >
           <div>
-            <h4 style={{ margin: "0 0 4px 0", color: "#212529" }}>{act.name}</h4>
-            <div style={{ color: "#6c757d", fontSize: "0.9em" }}>
-              <span style={{ marginRight: "12px" }}>⏱️ {act.duration} min</span>
+            <h4 className="m-0 mb-1 text-gray-800">{act.name}</h4>
+            <div className="text-gray-500 text-sm">
+              <span className="mr-3">⏱️ {act.duration} min</span>
               <span>🔥 {act.caloriesBurned} kcal burned</span>
             </div>
           </div>
           <button
             onClick={() => onRemove(act.id)}
-            style={{
-              backgroundColor: "#dc3545",
-              color: "#fff",
-              border: "none",
-              padding: "6px 12px",
-              borderRadius: "4px",
-              cursor: "pointer",
-              fontSize: "0.9em"
-            }}
+            className="bg-red-600 text-white px-3 py-1.5 rounded-md cursor-pointer text-sm"
           >
             Remove
           </button>

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo, useCallback } from "react";
 import axios from "axios";
 import {
   FoodItem,
@@ -15,15 +15,7 @@ import WaterTracker from "@components/WaterTracker";
 import CalorieChart from "@components/CalorieChart";
 import MealProgressComponent from "@components/MealProgress";
 
-const SPOONACULAR_API_KEYS = [
-  "5b0557bc79364a0fbe2e14c8fa75166c",
-  "11081c04d9824515b8bd7bdd02969a83",
-  "b67569d6a09949b2992db0607624b59e",
-  "76070b44bb124975973aa67f9cf594a5",
-  "23fee0fb7c08487fb4f429a1ee52e557",
-  "3bc92fe23c3d4e11b6ac2441c3c555d6",
-  "16435a56ebcd47d885c25449a0d8700c"
-];
+const SPOONACULAR_API_KEYS = import.meta.env.VITE_SPOONACULAR_API_KEYS?.split(',') || [];
 
 const STORAGE_KEY_FOODS = "farfit-foods";
 
@@ -53,15 +45,11 @@ const CalorieTracker: React.FC<CalorieTrackerProps> = ({
   const [dailyCalories, setDailyCalories] = useState(0);
   const [remaining, setRemaining] = useState(0);
   const [apiKeyIndex, setApiKeyIndex] = useState(0);
-  const [mealDistribution, setMealDistribution] = useState<MealCalorieDistribution>({
-    breakfast: 0,
-    lunch: 0,
-    dinner: 0,
-    snack: 0,
-    total: 0
-  });
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
+  // Memoize meal distribution calculation
+  const mealDistribution = useMemo(() => {
     const maintenance = currentWeight * 30;
     const calc =
       goal === "lose"
@@ -70,26 +58,40 @@ const CalorieTracker: React.FC<CalorieTrackerProps> = ({
         ? maintenance + 500
         : maintenance;
     const totalCalories = calc < 1200 ? 1200 : calc;
-    setDailyCalories(totalCalories);
 
-    // تقسیم کالری بین وعده‌ها
-    const distribution: MealCalorieDistribution = {
-      breakfast: Math.round(totalCalories * 0.3), // 30% صبحانه
-      lunch: Math.round(totalCalories * 0.35), // 35% ناهار
-      dinner: Math.round(totalCalories * 0.25), // 25% شام
-      snack: Math.round(totalCalories * 0.1), // 10% میان وعده
+    return {
+      breakfast: Math.round(totalCalories * 0.3),
+      lunch: Math.round(totalCalories * 0.35),
+      dinner: Math.round(totalCalories * 0.25),
+      snack: Math.round(totalCalories * 0.1),
       total: totalCalories
     };
-    setMealDistribution(distribution);
   }, [currentWeight, goal]);
 
-  useEffect(() => {
-    const consumed = foods.reduce((sum, f) => sum + f.calories, 0);
-    const burned = activities.reduce((sum, a) => sum + a.caloriesBurned, 0);
-    setRemaining(dailyCalories - consumed + burned);
-  }, [foods, dailyCalories, activities]);
+  // Memoize total calories consumed
+  const totalCaloriesConsumed = useMemo(() => 
+    foods.reduce((sum, f) => sum + f.calories, 0),
+    [foods]
+  );
 
-  const getMealProgress = (mealType: MealType): MealProgress => {
+  // Memoize total calories burned
+  const totalCaloriesBurned = useMemo(() => 
+    activities.reduce((sum, a) => sum + a.caloriesBurned, 0),
+    [activities]
+  );
+
+  // Update daily calories when meal distribution changes
+  useEffect(() => {
+    setDailyCalories(mealDistribution.total);
+  }, [mealDistribution]);
+
+  // Update remaining calories when consumed or burned calories change
+  useEffect(() => {
+    setRemaining(dailyCalories - totalCaloriesConsumed + totalCaloriesBurned);
+  }, [dailyCalories, totalCaloriesConsumed, totalCaloriesBurned]);
+
+  // Memoize meal progress calculation
+  const getMealProgress = useCallback((mealType: MealType): MealProgress => {
     const target = mealDistribution[mealType];
     const consumed = foods
       .filter(food => food.mealType === mealType)
@@ -102,16 +104,25 @@ const CalorieTracker: React.FC<CalorieTrackerProps> = ({
       consumed,
       remaining
     };
-  };
+  }, [mealDistribution, foods]);
 
-  const addFood = async (
+  // Memoize addFood function
+  const addFood = useCallback(async (
     name: string,
     amt: number,
     unit: string,
     category: CategoryOption,
     mealType: MealType
   ) => {
+    if (!SPOONACULAR_API_KEYS.length) {
+      setError("No API keys configured. Please add your Spoonacular API keys to the environment variables.");
+      return;
+    }
+
+    setIsLoading(true);
+    setError(null);
     const currentKey = SPOONACULAR_API_KEYS[apiKeyIndex];
+
     try {
       const search = await axios.get(
         `https://api.spoonacular.com/food/ingredients/search`,
@@ -123,9 +134,10 @@ const CalorieTracker: React.FC<CalorieTrackerProps> = ({
           }
         }
       );
+
       const hit = search.data.results?.[0];
       if (!hit) {
-        alert(`No results for "${name}".`);
+        setError(`No results found for "${name}". Please try a different food item.`);
         return;
       }
 
@@ -139,11 +151,17 @@ const CalorieTracker: React.FC<CalorieTrackerProps> = ({
           }
         }
       );
+
       const nutrientList = info.data.nutrition?.nutrients || [];
       const calObj = nutrientList.find(
         (n: any) => n.name.toLowerCase() === "calories"
       );
       const caloriesForGiven = calObj ? calObj.amount : 0;
+
+      if (caloriesForGiven === 0) {
+        setError("Could not find calorie information for this food item.");
+        return;
+      }
 
       const imageUrl = hit.image
         ? `https://spoonacular.com/cdn/ingredients_100x100/${hit.image}`
@@ -162,51 +180,53 @@ const CalorieTracker: React.FC<CalorieTrackerProps> = ({
 
       onAddFood(newFood);
     } catch (err: any) {
-      if (err.response && (err.response.status === 402 || err.response.status === 429)) {
-        const nextIndex = (apiKeyIndex + 1) % SPOONACULAR_API_KEYS.length;
-        setApiKeyIndex(nextIndex);
-        alert("API Key exhausted. Switched to next key.");
+      if (err.response) {
+        if (err.response.status === 402 || err.response.status === 429) {
+          const nextIndex = (apiKeyIndex + 1) % SPOONACULAR_API_KEYS.length;
+          setApiKeyIndex(nextIndex);
+          setError("API key limit reached. Switching to next key...");
+        } else {
+          setError(`Error: ${err.response.data?.message || 'Failed to fetch nutrition info'}`);
+        }
       } else {
-        console.error(err);
-        alert("Error fetching nutrition info. Try again.");
+        setError("Network error. Please check your internet connection.");
       }
+      console.error("Food search error:", err);
+    } finally {
+      setIsLoading(false);
     }
-  };
+  }, [apiKeyIndex, nextFoodId, onAddFood]);
 
   return (
     <div>
-      <h2>Daily Calorie Goal: {dailyCalories.toFixed(0)} kcal</h2>
-      <h3>Remaining: {remaining.toFixed(0)} kcal</h3>
+      {error && (
+        <div className="bg-red-100 text-red-700 p-3 rounded-lg mb-4 text-center">
+          {error}
+        </div>
+      )}
+
+      <div className="text-center mb-5 p-4 bg-gray-100 rounded-lg shadow">
+        <h2 className="m-0 mb-2 text-gray-800 text-2xl">
+          Daily Calorie Goal: {dailyCalories.toFixed(0)} kcal
+        </h2>
+        <h3 className="m-0 text-green-600 text-xl">
+          Remaining: {remaining.toFixed(0)} kcal
+        </h3>
+      </div>
+
       {activities.length > 0 && (
-        <div style={{ 
-          backgroundColor: "#e8f5e9",
-          padding: "12px",
-          borderRadius: "8px",
-          marginBottom: "16px"
-        }}>
-          <p style={{ margin: 0, color: "#2e7d32" }}>
-            🔥 Total calories burned today: {activities.reduce((sum, a) => sum + a.caloriesBurned, 0)} kcal
+        <div className="bg-green-100 p-3 rounded-lg mb-4">
+          <p className="m-0 text-green-800">
+            🔥 Total calories burned today: {totalCaloriesBurned} kcal
           </p>
         </div>
       )}
 
-      <div style={{ marginBottom: "16px" }}>
-        <h3 style={{ 
-          fontSize: "20px", 
-          color: "#2c3e50", 
-          marginBottom: "12px",
-          textAlign: "center"
-        }}>
+      <div className="mb-4">
+        <h3 className="text-xl text-gray-800 mb-3 text-center">
           Daily Calorie Distribution
         </h3>
-        <div style={{ 
-          display: "grid", 
-          gridTemplateColumns: "repeat(2, 1fr)",
-          gap: "8px",
-          padding: "0 8px",
-          maxWidth: "500px",
-          margin: "0 auto"
-        }}>
+        <div className="grid grid-cols-2 gap-2 px-2 max-w-md mx-auto">
           <MealProgressComponent progress={getMealProgress("breakfast")} />
           <MealProgressComponent progress={getMealProgress("lunch")} />
           <MealProgressComponent progress={getMealProgress("dinner")} />
@@ -216,8 +236,8 @@ const CalorieTracker: React.FC<CalorieTrackerProps> = ({
 
       <CalorieChart 
         dailyCalories={dailyCalories}
-        consumed={foods.reduce((sum, f) => sum + f.calories, 0)}
-        burned={activities.reduce((sum, a) => sum + a.caloriesBurned, 0)}
+        consumed={totalCaloriesConsumed}
+        burned={totalCaloriesBurned}
       />
 
       <FoodEntry onAdd={addFood} />
@@ -243,4 +263,4 @@ const CalorieTracker: React.FC<CalorieTrackerProps> = ({
   );
 };
 
-export default CalorieTracker;
+export default React.memo(CalorieTracker);

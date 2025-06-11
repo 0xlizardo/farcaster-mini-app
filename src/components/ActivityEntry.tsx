@@ -37,32 +37,22 @@ const ActivityEntry: React.FC<ActivityEntryProps> = ({ weightKg, onAdd }) => {
   };
 
   return (
-    <form onSubmit={handleSubmit} style={{ 
-      backgroundColor: "#f8f9fa",
-      padding: "20px",
-      borderRadius: "8px",
-      marginBottom: "20px"
-    }}>
-      <div style={{ marginBottom: "16px" }}>
-        <label htmlFor="activity" style={{ 
-          display: "block",
-          marginBottom: "8px",
-          color: "#495057",
-          fontWeight: "500"
-        }}>
+    <form
+      onSubmit={handleSubmit}
+      className="bg-gray-100 p-5 rounded-lg mb-5"
+    >
+      <div className="mb-4">
+        <label
+          htmlFor="activity"
+          className="block mb-2 text-gray-700 font-medium"
+        >
           Select Activity:
         </label>
         <select
           id="activity"
           value={activityName}
           onChange={(e) => setActivityName(e.target.value)}
-          style={{
-            width: "100%",
-            padding: "8px",
-            borderRadius: "4px",
-            border: "1px solid #ced4da",
-            backgroundColor: "#fff"
-          }}
+          className="w-full p-2 rounded-md border border-gray-300 bg-white"
         >
           {activityOptions.map((opt) => (
             <option key={opt.name} value={opt.name}>
@@ -72,13 +62,11 @@ const ActivityEntry: React.FC<ActivityEntryProps> = ({ weightKg, onAdd }) => {
         </select>
       </div>
 
-      <div style={{ marginBottom: "16px" }}>
-        <label htmlFor="duration" style={{ 
-          display: "block",
-          marginBottom: "8px",
-          color: "#495057",
-          fontWeight: "500"
-        }}>
+      <div className="mb-4">
+        <label
+          htmlFor="duration"
+          className="block mb-2 text-gray-700 font-medium"
+        >
           Duration (minutes):
         </label>
         <input
@@ -88,29 +76,13 @@ const ActivityEntry: React.FC<ActivityEntryProps> = ({ weightKg, onAdd }) => {
           onChange={(e) => setDuration(parseInt(e.target.value, 10))}
           min={1}
           required
-          style={{
-            width: "100%",
-            padding: "8px",
-            borderRadius: "4px",
-            border: "1px solid #ced4da",
-            backgroundColor: "#fff"
-          }}
+          className="w-full p-2 rounded-md border border-gray-300 bg-white"
         />
       </div>
 
-      <button 
+      <button
         type="submit"
-        style={{
-          backgroundColor: "#0d6efd",
-          color: "#fff",
-          border: "none",
-          padding: "10px 20px",
-          borderRadius: "4px",
-          cursor: "pointer",
-          width: "100%",
-          fontSize: "1em",
-          fontWeight: "500"
-        }}
+        className="bg-blue-600 text-white px-5 py-2.5 rounded-md cursor-pointer w-full text-base font-medium"
       >
         Add Activity
       </button>

@@ -31,5 +31,8 @@ yarn-error.log*
 # Vite cache
 .vite/
 
-# Verify directory
-/verify/
+# Verify
+/verify
+
+# Node.js
+.npmrc
