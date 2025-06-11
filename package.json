@@ -50,6 +50,7 @@
     "node": "20.x"
   },
   "optionalDependencies": {
-    "@rollup/rollup-linux-x64-gnu": "^4.43.0"
+    "@rollup/rollup-linux-x64-gnu": "^4.43.0",
+    "@rollup/rollup-win32-x64-msvc": "^4.43.0"
   }
 }
