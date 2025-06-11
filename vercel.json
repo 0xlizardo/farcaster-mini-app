@@ -1,7 +1,7 @@
 {
-  "buildCommand": "npm run build",
-  "devCommand": "npm run dev",
-  "installCommand": "npm install --force",
+  "buildCommand": "npx vite build",
+  "devCommand": "npx vite",
+  "installCommand": "npm install",
   "framework": "vite",
   "outputDirectory": "dist"
 } 
