@@ -1,0 +1,41 @@
+{
+  "compilerOptions": {
+    "target": "ESNext",
+    "useDefineForClassFields": true,
+    "lib": ["DOM", "DOM.Iterable", "ESNext"],
+    "allowJs": false,
+    "skipLibCheck": true,
+    "esModuleInterop": false,
+    "allowSyntheticDefaultImports": true,
+    "strict": true,
+    "forceConsistentCasingInFileNames": true,
+    "module": "ESNext",
+    "moduleResolution": "Node",
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "noEmit": true,
+    "jsx": "react-jsx",
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noFallthroughCasesInSwitch": true,
+
+    // Project‐wide path mappings
+    "baseUrl": ".",
+    "paths": {
+      "@components/*": ["src/components/*"],
+      "@assets/*": ["src/assets/*"],
+      "@types": ["src/types/index.ts"],
+      "@types/*": ["src/types/*"]
+    },
+
+    // Tell TS about Node and Vite types
+    "types": ["node", "vite/client"]
+  },
+  "include": ["src", "src/types"],
+  "optionalDependencies": {
+    "@rollup/rollup-linux-x64-gnu": "^4.43.0",
+    "@rollup/rollup-win32-x64-msvc": "^4.43.0",
+    "@rollup/rollup-darwin-x64":     "^4.43.0"   // macOS dev machines
+  }
+}
+
